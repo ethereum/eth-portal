@@ -1,7 +1,7 @@
-<PROJECT_NAME>
+Portal Network Tools
 ==============================
 
-<SHORT_DESCRIPTION>
+A collection of utilities related to Ethereum's Portal Network
 
 Contents
 --------
@@ -9,7 +9,7 @@ Contents
 .. toctree::
     :maxdepth: 3
 
-    <MODULE_NAME>
+    eth_portal
     release_notes
 
 
