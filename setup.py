@@ -56,6 +56,9 @@ setup(
     include_package_data=True,
     install_requires=[
         "eth-utils>=2,<3",
+        "coincurve",
+        "eth-keys>=0.4.0,<0.5.0",
+        "eth-hash[pycryptodome]",
     ],
     python_requires='>=3.6, <4',
     extras_require=extras_require,
