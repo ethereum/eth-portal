@@ -57,10 +57,7 @@ setup(
     url='https://github.com/ethereum/eth-portal',
     include_package_data=True,
     install_requires=[
-        "eth-utils>=2,<3",
-        "coincurve",
-        "eth-keys>=0.4.0,<0.5.0",
-        "eth-hash[pycryptodome]",
+        "web3>=5,<6",
     ],
     python_requires='>=3.6, <4',
     extras_require=extras_require,
