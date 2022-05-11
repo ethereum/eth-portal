@@ -254,7 +254,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'Portal Network Tools', 'Portal Network Tools Documentation',
-   'The Ethereum Foundation', 'Portal Network Tools', 'A collection of utilities related to Ethereum's Portal Network',
+   'The Ethereum Foundation', 'Portal Network Tools', '''A collection of utilities related to Ethereum's Portal Network''',
    'Miscellaneous'),
 ]
 
