@@ -1,0 +1,1 @@
+Add web3 dependency in order to poll for new headers, and py-evm dependency to encode headers to RLP
