@@ -5,7 +5,7 @@ Generate passwords and their associated Portal Network Node IDs
 
 Generate a bunch of node IDs, then find the one closest to 0
 ```
-./eth_portal/make_node_ids.py 100000 >>all_node_ids
+./scripts/make_node_ids.py 100000 >>all_node_ids
 grep "^00" node_ids | sort | head -1
 ```
 
@@ -26,6 +26,7 @@ def make_ids(num_nodes):
         public_key = PrivateKey(private_key).public_key.to_bytes()
         node_id = keccak(public_key)
         print(node_id.hex(), private_key.hex())
+
 
 if __name__ == '__main__':
     import sys
