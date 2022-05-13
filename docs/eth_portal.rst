@@ -4,10 +4,10 @@ eth\_portal package
 Submodules
 ----------
 
-eth\_portal.rlp module
-----------------------
+eth\_portal.web3\_decoding module
+---------------------------------
 
-.. automodule:: eth_portal.rlp
+.. automodule:: eth_portal.web3_decoding
     :members:
     :undoc-members:
     :show-inheritance:
