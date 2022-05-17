@@ -1,22 +1,26 @@
 #!/usr/bin/env python3
-
-from web3.auto.infura import w3
 import time
 
-def handle_new_header_hash(header_hash):
-    print(header_hash)
-    block = w3.eth.getBlock(header_hash, full_transactions=True)
-    print(repr(block))
+from eth_portal.bridge import (
+    PortalInserters,
+    handle_new_header,
+)
 
-def log_loop(event_filter, poll_interval):
+
+def header_log_loop(w3, event_filter, poll_interval):
+    portal_inserters = PortalInserters()
+
     while True:
-        for event in event_filter.get_new_entries():
-            handle_new_header_hash(event)
+        for header_hash in event_filter.get_new_entries():
+            handle_new_header(w3, portal_inserters, header_hash)
         time.sleep(poll_interval)
 
-def main():
+
+def launch_bridge():
+    from web3.auto.infura import w3
     block_filter = w3.eth.filter('latest')
-    log_loop(block_filter, 6)
+    header_log_loop(w3, block_filter, 6)
+
 
 if __name__ == '__main__':
-    main()
+    launch_bridge()
