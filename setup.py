@@ -59,6 +59,7 @@ setup(
     install_requires=[
         "web3>=5,<6",
         "py-evm==0.5.0-alpha.3",
+        "ssz<0.3.0,>=0.2.0",
     ],
     python_requires='>=3.6, <4',
     extras_require=extras_require,
