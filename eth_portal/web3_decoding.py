@@ -26,7 +26,7 @@ def header_fields_to_header(web3_header_fields):
     rlp-serializable object is one that can be passed in as an argument to
     rlp.encode(). Hashing that result must always return the hash of the block.
 
-    If uncles are not empty, the provided argument must be explicitly augmented
+    If uncles are not empty, then `web3_header_fields` must be explicitly augmented
     with an 'uncleHeaders' field, which is a list of web3 header objects, one
     for each header. (order matters)
     """
