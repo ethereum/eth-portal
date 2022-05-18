@@ -13,7 +13,7 @@ from web3.datastructures import (
 )
 
 from eth_portal.bridge import (
-    header_fields_to_content,
+    block_fields_to_content,
 )
 
 EXPECTED_CONTENT_BY_HASH = {
@@ -75,22 +75,22 @@ EXPECTED_CONTENT_BY_HASH = {
 }
 
 
-def test_header_to_content(web3_header):
+def test_header_to_content(web3_block):
     sample_chain_id = 3
-    content_id, content_value = header_fields_to_content(web3_header, sample_chain_id)
+    content_id, content_value = block_fields_to_content(web3_block, sample_chain_id)
 
     # Prepare to grab expected results
-    assert web3_header.hash in EXPECTED_CONTENT_BY_HASH
-    expected_id, expected_value = EXPECTED_CONTENT_BY_HASH[web3_header.hash]
+    assert web3_block.hash in EXPECTED_CONTENT_BY_HASH
+    expected_id, expected_value = EXPECTED_CONTENT_BY_HASH[web3_block.hash]
 
     assert content_id == expected_id
     assert content_value == expected_value
 
 
-def test_bad_header_hash(web3_header):
+def test_bad_header_hash(web3_block):
     # By only changing the hash, we should see a ValidationError when trying to
     #   convert to content ID/Value
-    bad_header_dict = assoc(web3_header, 'hash', b'X' * 32)
+    bad_header_dict = assoc(web3_block, 'hash', b'X' * 32)
     bad_header = AttributeDict(bad_header_dict)
     with pytest.raises(ValidationError):
-        header_fields_to_content(bad_header, chain_id=1)
+        block_fields_to_content(bad_header, chain_id=1)

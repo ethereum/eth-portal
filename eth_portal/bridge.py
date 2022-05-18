@@ -20,7 +20,7 @@ from eth_portal.trin import (
     launch_trin,
 )
 from eth_portal.web3_decoding import (
-    header_fields_to_header,
+    block_fields_to_header,
 )
 from eth_portal.web3_encoding import (
     header_content_id,
@@ -96,13 +96,13 @@ def propagate_header(w3, portal_inserter: PortalInserter, header_hash: bytes, ch
         ]
 
     # Encode data for posting
-    content_id, content_value = header_fields_to_content(block_fields, chain_id)
+    content_id, content_value = block_fields_to_content(block_fields, chain_id)
 
     # Post data to trin nodes
     portal_inserter.push_history(content_id, content_value)
 
 
-def header_fields_to_content(block_fields, chain_id) -> Tuple[bytes, bytes]:
+def block_fields_to_content(block_fields, chain_id) -> Tuple[bytes, bytes]:
     """
     Convert a web3 block into a Portal History Network content ID and value.
 
@@ -116,15 +116,15 @@ def header_fields_to_content(block_fields, chain_id) -> Tuple[bytes, bytes]:
     :raise ValidationError: if the rlp-encoded header does not match the header
         hash in `block_fields`
     """
-    header = header_fields_to_header(block_fields)
+    header = block_fields_to_header(block_fields)
     header_rlp = rlp.encode(header)
 
-    if keccak(header_rlp) != header_fields.hash:
+    if keccak(header_rlp) != block_fields.hash:
         raise ValidationError(
-            f"Could not correctly encode header fields {header_fields} to {header!r}"
+            f"Could not correctly encode header fields {block_fields} to {header!r}"
         )
 
-    content_id = header_content_id(header_fields.hash, chain_id)
+    content_id = header_content_id(block_fields.hash, chain_id)
     return content_id, header_rlp
 
 
