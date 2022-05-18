@@ -7,8 +7,9 @@ Contents
 --------
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 2
 
+    bridge
     eth_portal
     release_notes
 
