@@ -23,7 +23,7 @@ from eth_portal.web3_decoding import (
     block_fields_to_header,
 )
 from eth_portal.web3_encoding import (
-    header_content_id,
+    header_content_key,
 )
 
 
@@ -40,24 +40,24 @@ class PortalInserter:
         """
         self._web3_links = web3_links
 
-    def push_history(self, content_id: bytes, content_value: bytes):
+    def push_history(self, content_key: bytes, content_value: bytes):
         """
         Push the given Portal History content out to the group of portal clients.
         """
-        content_id_hex = encode_hex(content_id)
+        content_key_hex = encode_hex(content_key)
         content_value_hex = encode_hex(content_value)
 
         print(
-            "Propagate new history content with ID, value:",
-            content_id_hex,
+            "Propagate new history content with key, value:",
+            content_key_hex,
             ",",
             content_value_hex,
         )
 
         # For now, just push to all inserting clients. When running more, be a
-        #   bit smarter about selecting inserters closer to the content ID
+        #   bit smarter about selecting inserters closer to the content key
         for w3 in self._web3_links:
-            w3.provider.make_request('portal_historyStore', [content_id_hex, content_value_hex])
+            w3.provider.make_request('portal_historyStore', [content_key_hex, content_value_hex])
 
 
 def handle_new_header(w3, portal_inserter: PortalInserter, header_hash: bytes, chain_id=1):
@@ -69,7 +69,7 @@ def handle_new_header(w3, portal_inserter: PortalInserter, header_hash: bytes, c
     are propagated.
 
     :param w3: web3 access to core Ethereum content
-    :param portal_inserter: a class responsible for pushing content IDs and
+    :param portal_inserter: a class responsible for pushing content keys and
         values into the network via a group of running portal clients
     :param header_hash: the new header hash that we were notified exists on the network
     :param chain_id: Ethereum network Chain ID that this header exists on
@@ -83,7 +83,7 @@ def propagate_header(w3, portal_inserter: PortalInserter, header_hash: bytes, ch
     React to new header hash notification by posting header to Portal History Network.
 
     :param w3: web3 access to core Ethereum content
-    :param portal_inserter: a class responsible for pushing content IDs and
+    :param portal_inserter: a class responsible for pushing content keys and
         values into the network via a group of running portal clients
     :param header_hash: the new header hash that we were notified exists on the network
     :param chain_id: Ethereum network Chain ID that this header exists on
@@ -96,17 +96,17 @@ def propagate_header(w3, portal_inserter: PortalInserter, header_hash: bytes, ch
         ]
 
     # Encode data for posting
-    content_id, content_value = block_fields_to_content(block_fields, chain_id)
+    content_key, content_value = block_fields_to_content(block_fields, chain_id)
 
     # Post data to trin nodes
-    portal_inserter.push_history(content_id, content_value)
+    portal_inserter.push_history(content_key, content_value)
 
 
 def block_fields_to_content(block_fields, chain_id) -> Tuple[bytes, bytes]:
     """
-    Convert a web3 block into a Portal History Network content ID and value.
+    Convert a web3 block into a Portal History Network content key and value.
 
-    A web3 block is the result of a w3.eth.getBlock() request. A content ID and
+    A web3 block is the result of a w3.eth.getBlock() request. A content key and
     value are the byte-strings specified by the Portal Network Spec.
 
     If uncles are not empty, then `block_fields` must be explicitly augmented
@@ -124,8 +124,8 @@ def block_fields_to_content(block_fields, chain_id) -> Tuple[bytes, bytes]:
             f"Could not correctly encode header fields {block_fields} to {header!r}"
         )
 
-    content_id = header_content_id(block_fields.hash, chain_id)
-    return content_id, header_rlp
+    content_key = header_content_key(block_fields.hash, chain_id)
+    return content_key, header_rlp
 
 
 @contextmanager
