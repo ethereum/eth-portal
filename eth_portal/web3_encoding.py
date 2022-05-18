@@ -10,7 +10,7 @@ from ssz.sedes import (
 # SSZ encoding
 #
 
-HEADER_TYPE_BYTE = b'\x01'
+HEADER_TYPE_BYTE = b'\x00'
 HEADER_SEDES = Container((
     uint16,  # Chain ID
     Vector(uint8, 32),  # header hash
