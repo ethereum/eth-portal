@@ -77,13 +77,13 @@ EXPECTED_CONTENT_BY_HASH = {
 
 def test_header_to_content(web3_block):
     sample_chain_id = 3
-    content_id, content_value = block_fields_to_content(web3_block, sample_chain_id)
+    content_key, content_value = block_fields_to_content(web3_block, sample_chain_id)
 
     # Prepare to grab expected results
     assert web3_block.hash in EXPECTED_CONTENT_BY_HASH
-    expected_id, expected_value = EXPECTED_CONTENT_BY_HASH[web3_block.hash]
+    expected_key, expected_value = EXPECTED_CONTENT_BY_HASH[web3_block.hash]
 
-    assert content_id == expected_id
+    assert content_key == expected_key
     assert content_value == expected_value
 
 

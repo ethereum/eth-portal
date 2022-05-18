@@ -4,7 +4,7 @@ from eth_utils import (
 import pytest
 
 from eth_portal.web3_encoding import (
-    header_content_id,
+    header_content_key,
 )
 
 
@@ -22,5 +22,5 @@ from eth_portal.web3_encoding import (
     )
 )
 def test_encode_header(chain_id, header_hash, expected_encoding):
-    content_id = header_content_id(header_hash, chain_id)
-    assert content_id == expected_encoding
+    content_key = header_content_key(header_hash, chain_id)
+    assert content_key == expected_encoding
