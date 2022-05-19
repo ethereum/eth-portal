@@ -90,10 +90,6 @@ def propagate_header(w3, portal_inserter: PortalInserter, header_hash: bytes, ch
     """
     # Retrieve data to post to network
     block_fields = w3.eth.getBlock(header_hash, full_transactions=False)
-    if block_fields.uncles:
-        block_fields.uncleHeaders = [
-            w3.eth.getBlock(uncle_hash) for uncle_hash in block_fields.uncles
-        ]
 
     # Encode data for posting
     content_key, content_value = block_fields_to_content(block_fields, chain_id)
@@ -108,10 +104,6 @@ def block_fields_to_content(block_fields, chain_id) -> Tuple[bytes, bytes]:
 
     A web3 block is the result of a w3.eth.getBlock() request. A content key and
     value are the byte-strings specified by the Portal Network Spec.
-
-    If uncles are not empty, then `block_fields` must be explicitly augmented
-    with an 'uncleHeaders' field, which is a list of web3 header objects, one
-    for each header. (order matters)
 
     :raise ValidationError: if the rlp-encoded header does not match the header
         hash in `block_fields`
