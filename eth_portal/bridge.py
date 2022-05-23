@@ -74,22 +74,24 @@ def handle_new_header(w3, portal_inserter: PortalInserter, header_hash: bytes, c
     :param header_hash: the new header hash that we were notified exists on the network
     :param chain_id: Ethereum network Chain ID that this header exists on
     """
-    propagate_header(w3, portal_inserter, header_hash, chain_id)
+    _ = propagate_header(w3, portal_inserter, chain_id, header_hash)
     # TODO propagate bodies & receipts
 
 
-def propagate_header(w3, portal_inserter: PortalInserter, header_hash: bytes, chain_id: int):
+def propagate_header(w3, portal_inserter: PortalInserter, chain_id: int, header_hash: bytes):
     """
     React to new header hash notification by posting header to Portal History Network.
 
     :param w3: web3 access to core Ethereum content
     :param portal_inserter: a class responsible for pushing content keys and
         values into the network via a group of running portal clients
-    :param header_hash: the new header hash that we were notified exists on the network
     :param chain_id: Ethereum network Chain ID that this header exists on
+    :param header_hash: the new header hash that we were notified exists on the network
+
+    :return: the web3 block fields for the given header hash
     """
     # Retrieve data to post to network
-    block_fields = w3.eth.getBlock(header_hash, full_transactions=False)
+    block_fields = w3.eth.get_block(header_hash, full_transactions=False)
 
     # Encode data for posting
     content_key, content_value = block_fields_to_content(block_fields, chain_id)
@@ -97,13 +99,17 @@ def propagate_header(w3, portal_inserter: PortalInserter, header_hash: bytes, ch
     # Post data to trin nodes
     portal_inserter.push_history(content_key, content_value)
 
+    return block_fields
+
 
 def block_fields_to_content(block_fields, chain_id) -> Tuple[bytes, bytes]:
     """
     Convert a web3 block into a Portal History Network content key and value.
 
-    A web3 block is the result of a w3.eth.getBlock() request. A content key and
+    A web3 block is the result of a w3.eth.get_block() request. A content key and
     value are the byte-strings specified by the Portal Network Spec.
+
+    :return: (content_key, content_value)
 
     :raise ValidationError: if the rlp-encoded header does not match the header
         hash in `block_fields`
@@ -114,6 +120,12 @@ def block_fields_to_content(block_fields, chain_id) -> Tuple[bytes, bytes]:
     if keccak(header_rlp) != block_fields.hash:
         raise ValidationError(
             f"Could not correctly encode header fields {block_fields} to {header!r}"
+        )
+
+    if header.hash != block_fields.hash:
+        raise ValidationError(
+            "py-evm generated a different hash than we did manually with"
+            f" header fields {block_fields} to {header!r}"
         )
 
     content_key = header_content_key(block_fields.hash, chain_id)
