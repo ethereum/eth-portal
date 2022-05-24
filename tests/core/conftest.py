@@ -26,6 +26,8 @@ def block_info_and_web3_receipts():
             (
                 # block number
                 14764013,
+                # header hash
+                HexBytes('0x720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c'),
                 # receipt root
                 HexBytes('0x168a3827607627e781941dc777737fc4b6beb69a8b139240b881992b35b854ea'),
             ),

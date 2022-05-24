@@ -7,6 +7,9 @@ from typing import (
     Tuple,
 )
 
+from eth.db.trie import (
+    make_trie_root_and_nodes,
+)
 from eth_hash.auto import (
     keccak,
 )
@@ -21,9 +24,12 @@ from eth_portal.trin import (
 )
 from eth_portal.web3_decoding import (
     block_fields_to_header,
+    receipt_fields_to_receipt,
 )
 from eth_portal.web3_encoding import (
     header_content_key,
+    receipt_content_key,
+    receipt_content_value,
 )
 
 
@@ -130,6 +136,35 @@ def block_fields_to_content(block_fields, chain_id) -> Tuple[bytes, bytes]:
 
     content_key = header_content_key(block_fields.hash, chain_id)
     return content_key, header_rlp
+
+
+def encode_receipts_content(
+        web3_receipts,
+        chain_id: int,
+        header_hash: bytes,
+        block_number: int,
+        receipt_root: hash,
+) -> Tuple[bytes, bytes]:
+    """
+    Generate a Portal History Network content key and value, from a list of web3 receipts.
+
+    :return: (content_key, content_value)
+
+    :raise ValidationError: if the encoded receipts do not match the header's `receipt_root`
+    """
+    # Convert web3 receipts to py-evm receipts
+    receipts = [receipt_fields_to_receipt(receipt, block_number) for receipt in web3_receipts]
+
+    # Validate against the receipt root
+    calculated_root, _ = make_trie_root_and_nodes(receipts)
+    if calculated_root != receipt_root:
+        raise ValidationError(
+            f"Could not correctly encode receipts for header {header_hash.hex()}"
+        )
+
+    content_key = receipt_content_key(header_hash, chain_id)
+    content_value = receipt_content_value(receipts)
+    return content_key, content_value
 
 
 @contextmanager

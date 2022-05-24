@@ -1,5 +1,6 @@
 from eth_utils import (
     ValidationError,
+    keccak,
 )
 from eth_utils.toolz import (
     assoc,
@@ -14,6 +15,7 @@ from web3.datastructures import (
 
 from eth_portal.bridge import (
     block_fields_to_content,
+    encode_receipts_content,
 )
 
 EXPECTED_CONTENT_BY_HASH = {
@@ -94,3 +96,34 @@ def test_bad_header_hash(web3_block):
     bad_header = AttributeDict(bad_header_dict)
     with pytest.raises(ValidationError):
         block_fields_to_content(bad_header, chain_id=1)
+
+
+def test_receipt_content(block_info_and_web3_receipts):
+    sample_chain_id = 4
+    (block_number, header_hash, receipt_root), web3_receipts = block_info_and_web3_receipts
+
+    content_key, content_value = encode_receipts_content(
+        web3_receipts,
+        sample_chain_id,
+        header_hash,
+        block_number,
+        receipt_root,
+    )
+
+    assert content_key == HexBytes('0x020400720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c')  # noqa: E501
+    assert keccak(content_value) == HexBytes('0x2d22e96ced3c0c4afd36a0d58e99dfd38f3c3a7e9b71c2127407f30730e6f599')  # noqa: E501
+
+
+def test_bad_receipt_content(block_info_and_web3_receipts):
+    sample_chain_id = 4
+    (block_number, header_hash, _), web3_receipts = block_info_and_web3_receipts
+
+    wrong_reference_receipt_root = b'no' * 16
+    with pytest.raises(ValidationError):
+        encode_receipts_content(
+            web3_receipts,
+            sample_chain_id,
+            header_hash,
+            block_number,
+            wrong_reference_receipt_root,
+        )
