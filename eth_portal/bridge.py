@@ -23,6 +23,8 @@ class PortalInserter:
     to. At documentation time, it naively pushes all content to all supplied nodes.
     """
 
+    MAX_FIELD_DISPLAY_LENGTH = 2048
+
     def __init__(self, web3_links):
         """
         Create an instance, with web3 links to the launched Portal nodes.
@@ -36,11 +38,17 @@ class PortalInserter:
         content_key_hex = encode_hex(content_key)
         content_value_hex = encode_hex(content_value)
 
+        value_len = len(content_value_hex)
+        if value_len > self.MAX_FIELD_DISPLAY_LENGTH:
+            value_suffix = f"... ({value_len-self.MAX_FIELD_DISPLAY_LENGTH} more)"
+        else:
+            value_suffix = ""
+
         print(
             "Propagate new history content with key, value:",
             content_key_hex,
             ",",
-            content_value_hex,
+            content_value_hex[: self.MAX_FIELD_DISPLAY_LENGTH] + value_suffix,
         )
 
         # For now, just push to all inserting clients. When running more, be a
@@ -129,7 +137,7 @@ def block_fields_to_content(block_fields, chain_id) -> Tuple[bytes, bytes]:
 
 
 def propagate_receipts(
-    w3, portal_inserter: PortalInserter, chain_id: int, block_fields: bytes
+    w3, portal_inserter: PortalInserter, chain_id: int, block_fields
 ):
     """
     React to new header hash notification by posting receipts to Portal History Network.
@@ -138,7 +146,7 @@ def propagate_receipts(
     :param portal_inserter: a class responsible for pushing content keys and
         values into the network via a group of running portal clients
     :param chain_id: Ethereum network Chain ID that this header exists on
-    :param block_fields: the web3 block fields for header to retrieve receipts from
+    :param block_fields: the web3 block fields for the header to retrieve receipts from
     """
     # Retrieve data to post to network
     print("Collecting receipts to propagate...")
