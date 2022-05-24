@@ -1,0 +1,1 @@
+Encode receipt values, tested against header's receipt root hash
