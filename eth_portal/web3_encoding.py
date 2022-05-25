@@ -1,23 +1,18 @@
 import ssz
-from ssz.sedes import (
-    Byte,
-    Container,
-    List,
-    Vector,
-    uint8,
-    uint16,
-)
+from ssz.sedes import Byte, Container, List, Vector, uint8, uint16
 
 #
 # SSZ encoding
 #
 
-HEADER_TYPE_BYTE = b'\x00'
-RECEIPT_TYPE_BYTE = b'\x02'
-BLOCK_KEY_SEDES = Container((
-    uint16,  # Chain ID
-    Vector(uint8, 32),  # header hash
-))
+HEADER_TYPE_BYTE = b"\x00"
+RECEIPT_TYPE_BYTE = b"\x02"
+BLOCK_KEY_SEDES = Container(
+    (
+        uint16,  # Chain ID
+        Vector(uint8, 32),  # header hash
+    )
+)
 
 BLOCK_RECEIPTS_SEDES = List(
     # Each encoded receipt
@@ -57,7 +52,6 @@ def receipt_content_value(receipts) -> bytes:
     """
     # Awkward quirk that ssz must take an iterable of individual bytes, instead of `bytes`
     quirky_byte_list = [
-        [bytes([byte]) for byte in receipt.encode()]
-        for receipt in receipts
+        [bytes([byte]) for byte in receipt.encode()] for receipt in receipts
     ]
     return ssz.encode(quirky_byte_list, BLOCK_RECEIPTS_SEDES)

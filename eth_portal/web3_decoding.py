@@ -1,26 +1,10 @@
-from eth.chains import (
-    MainnetChain,
-)
-from eth.rlp.headers import (
-    BlockHeader,
-)
-from eth.rlp.logs import (
-    Log,
-)
-from eth.rlp.receipts import (
-    Receipt,
-)
-from eth.vm.forks.london.blocks import (
-    LondonBlockHeader,
-)
-from eth_utils import (
-    to_bytes,
-    to_canonical_address,
-    to_int,
-)
-from eth_utils.toolz import (
-    assoc,
-)
+from eth.chains import MainnetChain
+from eth.rlp.headers import BlockHeader
+from eth.rlp.logs import Log
+from eth.rlp.receipts import Receipt
+from eth.vm.forks.london.blocks import LondonBlockHeader
+from eth_utils import to_bytes, to_canonical_address, to_int
+from eth_utils.toolz import assoc
 
 
 def block_fields_to_header(web3_block_fields):
@@ -32,7 +16,7 @@ def block_fields_to_header(web3_block_fields):
     rlp.encode(). Hashing that result must always return the hash of the block.
     """
     header_fields = _select_header_fields(web3_block_fields)
-    if 'base_fee_per_gas' in header_fields:
+    if "base_fee_per_gas" in header_fields:
         return LondonBlockHeader(**header_fields)
     else:
         return BlockHeader(**header_fields)
@@ -45,25 +29,25 @@ def _select_header_fields(block_fields):
     Inspired by py-evm's eth/tools/fixtures/helpers.py
     """
     base_fields = {
-        'parent_hash': block_fields['parentHash'],
-        'uncles_hash': block_fields['sha3Uncles'],
-        'coinbase': to_bytes(hexstr=block_fields['miner']),
-        'state_root': block_fields['stateRoot'],
-        'transaction_root': block_fields['transactionsRoot'],
-        'receipt_root': block_fields['receiptsRoot'],
-        'bloom': to_int(block_fields['logsBloom']),
-        'difficulty': block_fields['difficulty'],
-        'block_number': block_fields['number'],
-        'gas_limit': block_fields['gasLimit'],
-        'gas_used': block_fields['gasUsed'],
-        'timestamp': block_fields['timestamp'],
-        'extra_data': block_fields['extraData'],
-        'mix_hash': block_fields['mixHash'],
-        'nonce': block_fields['nonce'],
+        "parent_hash": block_fields["parentHash"],
+        "uncles_hash": block_fields["sha3Uncles"],
+        "coinbase": to_bytes(hexstr=block_fields["miner"]),
+        "state_root": block_fields["stateRoot"],
+        "transaction_root": block_fields["transactionsRoot"],
+        "receipt_root": block_fields["receiptsRoot"],
+        "bloom": to_int(block_fields["logsBloom"]),
+        "difficulty": block_fields["difficulty"],
+        "block_number": block_fields["number"],
+        "gas_limit": block_fields["gasLimit"],
+        "gas_used": block_fields["gasUsed"],
+        "timestamp": block_fields["timestamp"],
+        "extra_data": block_fields["extraData"],
+        "mix_hash": block_fields["mixHash"],
+        "nonce": block_fields["nonce"],
     }
 
-    if 'baseFeePerGas' in block_fields:
-        return assoc(base_fields, 'base_fee_per_gas', block_fields['baseFeePerGas'])
+    if "baseFeePerGas" in block_fields:
+        return assoc(base_fields, "base_fee_per_gas", block_fields["baseFeePerGas"])
     else:
         return base_fields
 
@@ -76,7 +60,7 @@ def receipt_fields_to_receipt(web3_receipt_fields, block_number):
     VM = MainnetChain.get_vm_class_for_block_number(block_number)
     ReceiptBuilder = VM.block_class.receipt_builder
 
-    if 'type' not in web3_receipt_fields or web3_receipt_fields.type == "0x0":
+    if "type" not in web3_receipt_fields or web3_receipt_fields.type == "0x0":
         return _build_legacy_receipt(web3_receipt_fields)
     else:
         # TODO remove to_int() when web3py starts normalizing internally
@@ -98,11 +82,11 @@ def _build_legacy_receipt(fields):
     # See eth/vm/forks/byzantium/constants.py for state root encodings
     # Field used to be the state root, but is now just a binary status indicator
     if fields.status == 0:
-        state_root = b''
+        state_root = b""
     elif fields.status == 1:
-        state_root = b'\x01'
+        state_root = b"\x01"
     else:
-        state_root = fields.status.to_bytes(32, 'big')
+        state_root = fields.status.to_bytes(32, "big")
 
     return Receipt(
         state_root=state_root,

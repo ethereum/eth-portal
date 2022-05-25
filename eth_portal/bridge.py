@@ -1,31 +1,13 @@
-from contextlib import (
-    ExitStack,
-    contextmanager,
-)
-from typing import (
-    Iterable,
-    Tuple,
-)
+from contextlib import ExitStack, contextmanager
+from typing import Iterable, Tuple
 
-from eth.db.trie import (
-    make_trie_root_and_nodes,
-)
-from eth_hash.auto import (
-    keccak,
-)
-from eth_utils import (
-    ValidationError,
-    encode_hex,
-)
+from eth.db.trie import make_trie_root_and_nodes
+from eth_hash.auto import keccak
+from eth_utils import ValidationError, encode_hex
 import rlp
 
-from eth_portal.trin import (
-    launch_trin,
-)
-from eth_portal.web3_decoding import (
-    block_fields_to_header,
-    receipt_fields_to_receipt,
-)
+from eth_portal.trin import launch_trin
+from eth_portal.web3_decoding import block_fields_to_header, receipt_fields_to_receipt
 from eth_portal.web3_encoding import (
     header_content_key,
     receipt_content_key,
@@ -40,6 +22,7 @@ class PortalInserter:
     Eventually, it will intelligently choose which nodes to broadcast content
     to. At documentation time, it naively pushes all content to all supplied nodes.
     """
+
     def __init__(self, web3_links):
         """
         Create an instance, with web3 links to the launched Portal nodes.
@@ -63,10 +46,14 @@ class PortalInserter:
         # For now, just push to all inserting clients. When running more, be a
         #   bit smarter about selecting inserters closer to the content key
         for w3 in self._web3_links:
-            w3.provider.make_request('portal_historyStore', [content_key_hex, content_value_hex])
+            w3.provider.make_request(
+                "portal_historyStore", [content_key_hex, content_value_hex]
+            )
 
 
-def handle_new_header(w3, portal_inserter: PortalInserter, header_hash: bytes, chain_id=1):
+def handle_new_header(
+    w3, portal_inserter: PortalInserter, header_hash: bytes, chain_id=1
+):
     """
     Handle header hash notifications by posting all new data to Portal History Network.
 
@@ -84,7 +71,9 @@ def handle_new_header(w3, portal_inserter: PortalInserter, header_hash: bytes, c
     # TODO propagate bodies & receipts
 
 
-def propagate_header(w3, portal_inserter: PortalInserter, chain_id: int, header_hash: bytes):
+def propagate_header(
+    w3, portal_inserter: PortalInserter, chain_id: int, header_hash: bytes
+):
     """
     React to new header hash notification by posting header to Portal History Network.
 
@@ -139,11 +128,11 @@ def block_fields_to_content(block_fields, chain_id) -> Tuple[bytes, bytes]:
 
 
 def encode_receipts_content(
-        web3_receipts,
-        chain_id: int,
-        header_hash: bytes,
-        block_number: int,
-        receipt_root: hash,
+    web3_receipts,
+    chain_id: int,
+    header_hash: bytes,
+    block_number: int,
+    receipt_root: hash,
 ) -> Tuple[bytes, bytes]:
     """
     Generate a Portal History Network content key and value, from a list of web3 receipts.
@@ -153,7 +142,9 @@ def encode_receipts_content(
     :raise ValidationError: if the encoded receipts do not match the header's `receipt_root`
     """
     # Convert web3 receipts to py-evm receipts
-    receipts = [receipt_fields_to_receipt(receipt, block_number) for receipt in web3_receipts]
+    receipts = [
+        receipt_fields_to_receipt(receipt, block_number) for receipt in web3_receipts
+    ]
 
     # Validate against the receipt root
     calculated_root, _ = make_trie_root_and_nodes(receipts)

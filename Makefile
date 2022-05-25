@@ -31,7 +31,8 @@ lint:
 	tox -elint
 
 lint-roll:
-	isort --recursive eth_portal tests
+	isort eth_portal scripts tests
+	black eth_portal scripts tests
 	$(MAKE) lint
 
 test:
