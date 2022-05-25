@@ -5,11 +5,7 @@ import time
 
 from eth_utils import decode_hex
 
-from eth_portal.bridge import (
-    handle_new_header,
-    launch_trin_inserters,
-)
-
+from eth_portal.bridge import handle_new_header, launch_trin_inserters
 
 INVALID_KEY_ENV_ERROR = (
     "Must supply environment variable PORTAL_BRIDGE_KEYS, as a"
@@ -31,7 +27,8 @@ def launch_bridge():
     with launch_trin_inserters(trin_node_keys) as portal_inserter:
         # Monitor for new headers on mainnet
         from web3.auto.infura import w3
-        block_filter = w3.eth.filter('latest')
+
+        block_filter = w3.eth.filter("latest")
 
         # On each new header, publish the content to the trin nodes
         header_log_loop(w3, portal_inserter, block_filter, 6)
@@ -39,11 +36,11 @@ def launch_bridge():
 
 def load_private_keys():
     try:
-        concat_keys = os.environ['PORTAL_BRIDGE_KEYS']
+        concat_keys = os.environ["PORTAL_BRIDGE_KEYS"]
     except KeyError:
         sys.exit(INVALID_KEY_ENV_ERROR)
     else:
-        hex_keys = concat_keys.split(',')
+        hex_keys = concat_keys.split(",")
         keys = [decode_hex(key) for key in hex_keys]
         if any(len(key) != 32 for key in keys):
             sys.exit(INVALID_KEY_ENV_ERROR)
@@ -51,7 +48,7 @@ def load_private_keys():
             return keys
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         launch_bridge()
     except KeyboardInterrupt:

@@ -1,16 +1,9 @@
-from contextlib import (
-    contextmanager,
-)
+from contextlib import contextmanager
 import signal
 import subprocess
 
-from eth_keys.datatypes import (
-    PrivateKey,
-)
-from eth_utils import (
-    keccak,
-    remove_0x_prefix,
-)
+from eth_keys.datatypes import PrivateKey
+from eth_utils import keccak, remove_0x_prefix
 from web3 import Web3
 
 
@@ -38,12 +31,14 @@ def launch_trin(private_key: bytes, port: int):
         trin_proc = subprocess.Popen(
             [
                 "./trin",
+                # fmt: off
                 "--discovery-port", str(port),
                 "--unsafe-private-key", private_key_hex,
                 "--web3-ipc-path", ipc_path,
                 "--kb", "20000",
                 "--networks", "history",
                 "--bootnodes", "default",
+                # fmt: on
             ],
             env={"TRIN_INFURA_PROJECT_ID": "1"},
         )

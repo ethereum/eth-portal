@@ -28,8 +28,9 @@ def make_ids(num_nodes):
         print(node_id.hex(), private_key.hex())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
+
     args = sys.argv
     if len(args) != 2:
         sys.exit("Must supply the number of node IDs you wish to generate")

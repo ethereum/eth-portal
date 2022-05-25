@@ -1,18 +1,9 @@
-from eth.db.trie import (
-    make_trie_root_and_nodes,
-)
-from eth_hash.auto import (
-    keccak,
-)
-from hexbytes import (
-    HexBytes,
-)
+from eth.db.trie import make_trie_root_and_nodes
+from eth_hash.auto import keccak
+from hexbytes import HexBytes
 import rlp
 
-from eth_portal.web3_decoding import (
-    block_fields_to_header,
-    receipt_fields_to_receipt,
-)
+from eth_portal.web3_decoding import block_fields_to_header, receipt_fields_to_receipt
 
 
 def test_web3_header_to_rlp(web3_block):
@@ -33,13 +24,13 @@ def test_receipt_root_from_fields(block_info_and_web3_receipts):
     # check fields:
     for idx, (receipt, web3_receipt) in enumerate(zip(receipts, web3_receipts)):
         # blooms equal
-        generated_bloom = HexBytes(receipt.bloom.to_bytes(256, 'big'))
+        generated_bloom = HexBytes(receipt.bloom.to_bytes(256, "big"))
         assert generated_bloom == web3_receipt.logsBloom
 
         # status/state-root equal
-        if receipt.state_root == b'':
+        if receipt.state_root == b"":
             assert web3_receipt.status == 0
-        elif receipt.state_root == b'\x01':
+        elif receipt.state_root == b"\x01":
             assert web3_receipt.status == 1
         else:
             assert HexBytes(web3_receipt.status) == receipt.state_root
