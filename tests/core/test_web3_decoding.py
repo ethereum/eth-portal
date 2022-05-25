@@ -1,5 +1,5 @@
 from eth.db.trie import (
-    _make_trie_root_and_nodes,
+    make_trie_root_and_nodes,
 )
 from eth_hash.auto import (
     keccak,
@@ -23,7 +23,7 @@ def test_web3_header_to_rlp(web3_block):
 
 
 def test_receipt_root_from_fields(block_info_and_web3_receipts):
-    (block_number, receipt_root), web3_receipts = block_info_and_web3_receipts
+    (block_number, _, receipt_root), web3_receipts = block_info_and_web3_receipts
     receipts = [
         receipt_fields_to_receipt(web3_receipt, block_number)
         for web3_receipt in web3_receipts
@@ -54,6 +54,6 @@ def test_receipt_root_from_fields(block_info_and_web3_receipts):
         assert receipt.gas_used == web3_receipt.cumulativeGasUsed
 
     # Compare to receipt root
-    calculated_root, _ = _make_trie_root_and_nodes(tuple(receipt.encode() for receipt in receipts))
+    calculated_root, _ = make_trie_root_and_nodes(receipts)
 
     assert calculated_root == receipt_root
