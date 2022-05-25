@@ -1,17 +1,22 @@
 #!/usr/bin/env python3
 
 """
-Generate passwords and their associated Portal Network Node IDs
+Generate private keys and their associated Portal Network Node IDs.
 
-Generate a bunch of node IDs, then find the one closest to 0
+This is useful for grinding to find node IDs near a certain value.
+
+For example, to generate a bunch of node IDs, then find the one closest to 0:
 ```
 ./scripts/make_node_ids.py 100000 >>all_node_ids
 grep "^00" node_ids | sort | head -1
 ```
 
-grep isn't strictly necessary, above. It's useful when you want to find an ID
-close to something other than 0. Even when looking for 0, it speeds things up a
-bit, by avoiding sorting the whole list.
+In the above example, one could sort without the grep and still be correct. We
+demonstrate with grep for two reasons:
+
+1. It's useful when you want to find an ID close to something other than 0.
+2. Even when looking for 0, it speeds things up noticeably, by avoiding sorting
+    the whole list.
 """
 
 import secrets
