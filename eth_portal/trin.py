@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+from pathlib import Path
 import signal
 import subprocess
 
@@ -26,25 +27,38 @@ def launch_trin(private_key: bytes, port: int):
     ipc_path = f"/tmp/trin-jsonrpc-{node_id_hex[:20]}.ipc"
     private_key_hex = remove_0x_prefix(private_key.hex())
 
-    print(f"Launching trin with node ID {node_id_hex[:10]}...")
-    try:
+    short_node_id = node_id_hex[:10]
+    trin_args = [
+        "./trin",
+        # fmt: off
+        "--discovery-port", str(port),
+        "--unsafe-private-key", private_key_hex,
+        "--web3-ipc-path", ipc_path,
+        "--kb", "20000",
+        "--networks", "history",
+        "--bootnodes", "default",
+        # fmt: on
+    ]
+
+    if Path(ipc_path).exists():
+        print(f"trin already running for {short_node_id}, skipping launch...")
+        trin_proc = None
+    else:
+        print(f"Launching trin with node ID {short_node_id} using...")
+        print(" ".join(trin_args))
         trin_proc = subprocess.Popen(
-            [
-                "./trin",
-                # fmt: off
-                "--discovery-port", str(port),
-                "--unsafe-private-key", private_key_hex,
-                "--web3-ipc-path", ipc_path,
-                "--kb", "20000",
-                "--networks", "history",
-                "--bootnodes", "default",
-                # fmt: on
-            ],
+            trin_args,
             env={"TRIN_INFURA_PROJECT_ID": "1"},
         )
 
+    try:
         yield Web3(Web3.IPCProvider(ipc_path))
     finally:
-        print(f"Exiting trin with node ID {node_id_hex[:10]}...")
-        trin_proc.send_signal(signal.SIGINT)
-        trin_proc.wait()
+        if trin_proc:
+            print(f"Exiting trin with node ID {node_id_hex[:10]}...")
+            trin_proc.send_signal(signal.SIGINT)
+            trin_proc.wait()
+        else:
+            print(
+                f"Did not launch trin with node ID {node_id_hex[:10]}, so cannot exit."
+            )
