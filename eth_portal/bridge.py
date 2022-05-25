@@ -54,9 +54,10 @@ class PortalInserter:
         # For now, just push to all inserting clients. When running more, be a
         #   bit smarter about selecting inserters closer to the content key
         for w3 in self._web3_links:
-            w3.provider.make_request(
+            result = w3.provider.make_request(
                 "portal_historyStore", [content_key_hex, content_value_hex]
             )
+            print("History store response:", result)
 
 
 def handle_new_header(
