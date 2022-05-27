@@ -5,7 +5,9 @@ from ssz.sedes import Byte, Container, List, Vector, uint8, uint16
 # SSZ encoding
 #
 
+# Blocks:
 HEADER_TYPE_BYTE = b"\x00"
+BODY_TYPE_BYTE = b"\x01"
 RECEIPT_TYPE_BYTE = b"\x02"
 BLOCK_KEY_SEDES = Container(
     (
@@ -33,6 +35,17 @@ def header_content_key(header_hash, chain_id=1):
 
     # I don't think py-ssz supports Union types, so manually tacking it on
     return HEADER_TYPE_BYTE + encoded
+
+
+def block_body_content_key(header_hash, chain_id=1):
+    """
+    Convert a header hash into a block body content key for the Portal History Network.
+
+    Include the chain ID, which defaults to mainnet.
+    """
+    # See implementation notes in header_content_key()
+    encoded = ssz.encode((chain_id, header_hash), BLOCK_KEY_SEDES)
+    return BODY_TYPE_BYTE + encoded
 
 
 def receipt_content_key(header_hash, chain_id=1):
