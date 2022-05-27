@@ -12,6 +12,14 @@ eth\_portal.bridge module
     :undoc-members:
     :show-inheritance:
 
+eth\_portal.portal\_encode module
+---------------------------------
+
+.. automodule:: eth_portal.portal_encode
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 eth\_portal.trin module
 -----------------------
 
@@ -20,18 +28,10 @@ eth\_portal.trin module
     :undoc-members:
     :show-inheritance:
 
-eth\_portal.web3\_decoding module
----------------------------------
+eth\_portal.web3\_decode module
+-------------------------------
 
-.. automodule:: eth_portal.web3_decoding
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-eth\_portal.web3\_encoding module
----------------------------------
-
-.. automodule:: eth_portal.web3_encoding
+.. automodule:: eth_portal.web3_decode
     :members:
     :undoc-members:
     :show-inheritance:

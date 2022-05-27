@@ -6,13 +6,13 @@ from eth_hash.auto import keccak
 from eth_utils import ValidationError, encode_hex
 import rlp
 
-from eth_portal.trin import launch_trin
-from eth_portal.web3_decoding import block_fields_to_header, receipt_fields_to_receipt
-from eth_portal.web3_encoding import (
+from eth_portal.portal_encode import (
     header_content_key,
     receipt_content_key,
     receipt_content_value,
 )
+from eth_portal.trin import launch_trin
+from eth_portal.web3_decode import block_fields_to_header, receipt_fields_to_receipt
 
 
 class PortalInserter:
