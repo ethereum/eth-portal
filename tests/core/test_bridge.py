@@ -90,20 +90,16 @@ def test_bad_header_hash(web3_block):
         block_fields_to_content(bad_header, chain_id=1)
 
 
-def test_receipt_content(block_info_and_web3_receipts):
+def test_receipt_content(web3_block_and_receipts):
     sample_chain_id = 4
-    (
-        block_number,
-        header_hash,
-        receipt_root,
-    ), web3_receipts = block_info_and_web3_receipts
+    web3_block, web3_receipts = web3_block_and_receipts
 
     content_key, content_value = encode_receipts_content(
         web3_receipts,
         sample_chain_id,
-        header_hash,
-        block_number,
-        receipt_root,
+        web3_block.hash,
+        web3_block.number,
+        web3_block.receiptsRoot,
     )
 
     assert content_key == HexBytes(
@@ -114,16 +110,16 @@ def test_receipt_content(block_info_and_web3_receipts):
     )  # noqa: E501
 
 
-def test_bad_receipt_content(block_info_and_web3_receipts):
+def test_bad_receipt_content(web3_block_and_receipts):
     sample_chain_id = 4
-    (block_number, header_hash, _), web3_receipts = block_info_and_web3_receipts
+    web3_block, web3_receipts = web3_block_and_receipts
 
     wrong_reference_receipt_root = b"no" * 16
     with pytest.raises(ValidationError):
         encode_receipts_content(
             web3_receipts,
             sample_chain_id,
-            header_hash,
-            block_number,
+            web3_block.hash,
+            web3_block.number,
             wrong_reference_receipt_root,
         )

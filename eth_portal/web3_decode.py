@@ -3,7 +3,7 @@ from eth.rlp.headers import BlockHeader
 from eth.rlp.logs import Log
 from eth.rlp.receipts import Receipt
 from eth.vm.forks.london.blocks import LondonBlockHeader
-from eth_utils import to_bytes, to_canonical_address, to_int
+from eth_utils import ValidationError, to_bytes, to_canonical_address, to_int
 from eth_utils.toolz import assoc
 
 
@@ -50,6 +50,71 @@ def _select_header_fields(block_fields):
         return assoc(base_fields, "base_fee_per_gas", block_fields["baseFeePerGas"])
     else:
         return base_fields
+
+
+def web3_result_to_transaction(web3_transaction, block_number):
+    """
+    Convert a web3 transaction into an rlp-serializable object.
+    """
+    # Get appropriate Virtual Machine rules for given block number
+    VM = MainnetChain.get_vm_class_for_block_number(block_number)
+    TransactionBuilder = VM.block_class.transaction_builder
+
+    if "type" not in web3_transaction or web3_transaction.type == "0x0":
+        return TransactionBuilder.new_transaction(
+            web3_transaction.nonce,
+            web3_transaction.gasPrice,
+            web3_transaction.gas,
+            to_canonical_address(web3_transaction.to),
+            web3_transaction.value,
+            to_bytes(hexstr=web3_transaction.input),
+            web3_transaction.v,
+            to_int(web3_transaction.r),
+            to_int(web3_transaction.s),
+        )
+    elif web3_transaction.type == "0x1":
+        return TransactionBuilder.new_access_list_transaction(
+            to_int(hexstr=web3_transaction.chainId),
+            web3_transaction.nonce,
+            web3_transaction.gasPrice,
+            web3_transaction.gas,
+            to_canonical_address(web3_transaction.to),
+            web3_transaction.value,
+            to_bytes(hexstr=web3_transaction.input),
+            _normalize_access_list(web3_transaction),
+            web3_transaction.v,
+            to_int(web3_transaction.r),
+            to_int(web3_transaction.s),
+        )
+    elif web3_transaction.type == "0x2":
+        return TransactionBuilder.new_dynamic_fee_transaction(
+            to_int(hexstr=web3_transaction.chainId),
+            web3_transaction.nonce,
+            web3_transaction.maxPriorityFeePerGas,
+            web3_transaction.maxFeePerGas,
+            web3_transaction.gas,
+            to_canonical_address(web3_transaction.to),
+            web3_transaction.value,
+            to_bytes(hexstr=web3_transaction.input),
+            _normalize_access_list(web3_transaction),
+            web3_transaction.v,
+            to_int(web3_transaction.r),
+            to_int(web3_transaction.s),
+        )
+    else:
+        raise ValidationError(
+            f"Cannot convert unsupported transaction type: {web3_transaction.type!r}"
+        )
+
+
+def _normalize_access_list(web3_transaction):
+    return [
+        (
+            to_canonical_address(addr_info.address),
+            [to_int(hexstr=slot) for slot in addr_info.storageKeys],
+        )
+        for addr_info in web3_transaction.accessList
+    ]
 
 
 def receipt_fields_to_receipt(web3_receipt_fields, block_number):

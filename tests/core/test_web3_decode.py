@@ -3,7 +3,11 @@ from eth_hash.auto import keccak
 from hexbytes import HexBytes
 import rlp
 
-from eth_portal.web3_decode import block_fields_to_header, receipt_fields_to_receipt
+from eth_portal.web3_decode import (
+    block_fields_to_header,
+    receipt_fields_to_receipt,
+    web3_result_to_transaction,
+)
 
 
 def test_web3_header_to_rlp(web3_block):
@@ -13,10 +17,21 @@ def test_web3_header_to_rlp(web3_block):
     assert keccak(header_rlp) == web3_block.hash
 
 
-def test_receipt_root_from_fields(block_info_and_web3_receipts):
-    (block_number, _, receipt_root), web3_receipts = block_info_and_web3_receipts
+def test_web3_to_transaction(web3_block):
+    transactions = [
+        web3_result_to_transaction(web3_transaction, web3_block.number)
+        for web3_transaction in web3_block.transactions
+    ]
+    assert all(transactions)
+
+    calculated_root, _ = make_trie_root_and_nodes(transactions)
+    assert calculated_root == web3_block.transactionsRoot
+
+
+def test_receipt_root_from_fields(web3_block_and_receipts):
+    web3_block, web3_receipts = web3_block_and_receipts
     receipts = [
-        receipt_fields_to_receipt(web3_receipt, block_number)
+        receipt_fields_to_receipt(web3_receipt, web3_block.number)
         for web3_receipt in web3_receipts
     ]
     assert all(receipts)
@@ -47,4 +62,4 @@ def test_receipt_root_from_fields(block_info_and_web3_receipts):
     # Compare to receipt root
     calculated_root, _ = make_trie_root_and_nodes(receipts)
 
-    assert calculated_root == receipt_root
+    assert calculated_root == web3_block.receiptsRoot
