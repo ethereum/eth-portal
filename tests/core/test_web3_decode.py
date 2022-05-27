@@ -3,7 +3,7 @@ from eth_hash.auto import keccak
 from hexbytes import HexBytes
 import rlp
 
-from eth_portal.web3_decoding import block_fields_to_header, receipt_fields_to_receipt
+from eth_portal.web3_decode import block_fields_to_header, receipt_fields_to_receipt
 
 
 def test_web3_header_to_rlp(web3_block):

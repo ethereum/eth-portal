@@ -1,7 +1,7 @@
 from eth_utils import decode_hex
 import pytest
 
-from eth_portal.web3_encoding import header_content_key, receipt_content_key
+from eth_portal.portal_encode import header_content_key, receipt_content_key
 
 
 @pytest.mark.parametrize(
