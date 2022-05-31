@@ -4,7 +4,11 @@ from hexbytes import HexBytes
 import pytest
 from web3.datastructures import AttributeDict
 
-from eth_portal.bridge import block_fields_to_content, encode_receipts_content
+from eth_portal.bridge import (
+    block_fields_to_content,
+    encode_block_body_content,
+    encode_receipts_content,
+)
 
 EXPECTED_CONTENT_BY_HASH = {
     HexBytes("0xe137900645bb727b8cd3d2bca2e1af46a9270fb59feb08969668a322583f8af7"): (
@@ -88,6 +92,61 @@ def test_bad_header_hash(web3_block):
     bad_header = AttributeDict(bad_header_dict)
     with pytest.raises(ValidationError):
         block_fields_to_content(bad_header, chain_id=1)
+
+
+def test_block_body_content(web3_block_and_uncles):
+    sample_chain_id = 3
+    web3_block, web3_uncles = web3_block_and_uncles
+    content_key, content_value = encode_block_body_content(
+        web3_block.transactions,
+        web3_uncles,
+        sample_chain_id,
+        web3_block.hash,
+        web3_block.number,
+        web3_block.transactionsRoot,
+        web3_block.sha3Uncles,
+    )
+
+    assert content_key == HexBytes(
+        "0x010300720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c"
+    )  # noqa: E501
+    assert HexBytes(keccak(content_value)) == HexBytes(
+        "0xc920a1156472daadcbb73176fd97b25b0a9d1103aafe95691de0d627024d8198"
+    )  # noqa: E501
+
+
+def test_bad_uncle_in_block_body_content(web3_block_and_uncles):
+    sample_chain_id = 3
+    web3_block, web3_uncles = web3_block_and_uncles
+
+    wrong_reference_uncles_root = b"no" * 16
+    with pytest.raises(ValidationError, match=r".*uncle.*"):
+        encode_block_body_content(
+            web3_block.transactions,
+            web3_uncles,
+            sample_chain_id,
+            web3_block.hash,
+            web3_block.number,
+            web3_block.transactionsRoot,
+            wrong_reference_uncles_root,
+        )
+
+
+def test_bad_transaction_in_block_body_content(web3_block_and_uncles):
+    sample_chain_id = 3
+    web3_block, web3_uncles = web3_block_and_uncles
+
+    wrong_reference_transactions_root = b"no" * 16
+    with pytest.raises(ValidationError, match=r".*transaction.*"):
+        encode_block_body_content(
+            web3_block.transactions,
+            web3_uncles,
+            sample_chain_id,
+            web3_block.hash,
+            web3_block.number,
+            wrong_reference_transactions_root,
+            web3_block.sha3Uncles,
+        )
 
 
 def test_receipt_content(web3_block_and_receipts):

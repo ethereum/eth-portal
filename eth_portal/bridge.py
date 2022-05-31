@@ -7,12 +7,18 @@ from eth_utils import ValidationError, encode_hex
 import rlp
 
 from eth_portal.portal_encode import (
+    block_body_content_key,
+    block_body_content_value,
     header_content_key,
     receipt_content_key,
     receipt_content_value,
 )
 from eth_portal.trin import launch_trin
-from eth_portal.web3_decode import block_fields_to_header, receipt_fields_to_receipt
+from eth_portal.web3_decode import (
+    block_fields_to_header,
+    receipt_fields_to_receipt,
+    web3_result_to_transaction,
+)
 
 
 class PortalInserter:
@@ -135,6 +141,53 @@ def block_fields_to_content(block_fields, chain_id) -> Tuple[bytes, bytes]:
 
     content_key = header_content_key(block_fields.hash, chain_id)
     return content_key, header_rlp
+
+
+def encode_block_body_content(
+    web3_transactions,
+    web3_uncles,
+    chain_id: int,
+    header_hash: bytes,
+    block_number: int,
+    transactions_root: hash,
+    uncles_root: hash,
+) -> Tuple[bytes, bytes]:
+    """
+    Generate a Portal History Network content key and value for a block body.
+
+    A block body is made up of the transaction bodies and the headers for the uncles.
+
+    :return: (content_key, content_value)
+
+    :raise ValidationError: if the encoded transactions or uncles do not match the
+        header's `transactions_root` or `uncles_root` respectively
+    """
+    # Convert web3 transactions to py-evm transactions
+    transactions = [
+        web3_result_to_transaction(web3_transaction, block_number)
+        for web3_transaction in web3_transactions
+    ]
+
+    # Validate against the transactions root
+    calculated_transaction_root, _ = make_trie_root_and_nodes(transactions)
+    if calculated_transaction_root != transactions_root:
+        raise ValidationError(
+            f"Could not correctly encode transactions for header {header_hash.hex()}"
+        )
+
+    # Convert web3 (uncle) headers into py-evm headers
+    uncles = [block_fields_to_header(web3_header) for web3_header in web3_uncles]
+
+    # Validate against the uncles root
+    calculated_uncle_root = keccak(rlp.encode(uncles))
+    if calculated_uncle_root != uncles_root:
+        raise ValidationError(
+            f"Could not correctly encode uncles for header {header_hash.hex()}"
+        )
+
+    content_key = block_body_content_key(header_hash, chain_id)
+    content_value = block_body_content_value(transactions, uncles)
+    return content_key, content_value
 
 
 def propagate_receipts(

@@ -26,6 +26,16 @@ def web3_block(request):
 
 
 @pytest.fixture
+def web3_block_and_uncles():
+    web3_block = _eval_one_from_file("tests/full_block_with_uncle.example")
+    uncles = _eval_from_file("tests/uncles_block14764013.example")
+    return (
+        web3_block,
+        uncles,
+    )
+
+
+@pytest.fixture
 def web3_block_and_receipts():
     web3_block = _eval_one_from_file("tests/full_block_with_uncle.example")
     receipts = _eval_from_file("tests/receipts_block14764013.example")
