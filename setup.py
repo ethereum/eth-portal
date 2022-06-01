@@ -58,7 +58,7 @@ setup(
     url='https://github.com/ethereum/eth-portal',
     include_package_data=True,
     install_requires=[
-        "web3>=5,<6",
+        "web3>=5.29.2,<6",
         "py-evm==0.5.0-alpha.3",
         "ssz<0.3.0,>=0.2.0",
     ],
