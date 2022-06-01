@@ -60,12 +60,17 @@ def web3_result_to_transaction(web3_transaction, block_number):
     VM = MainnetChain.get_vm_class_for_block_number(block_number)
     TransactionBuilder = VM.block_class.transaction_builder
 
+    if web3_transaction.to:
+        recipient = to_canonical_address(web3_transaction.to)
+    else:
+        recipient = b""
+
     if "type" not in web3_transaction or web3_transaction.type == "0x0":
         return TransactionBuilder.new_transaction(
             web3_transaction.nonce,
             web3_transaction.gasPrice,
             web3_transaction.gas,
-            to_canonical_address(web3_transaction.to),
+            recipient,
             web3_transaction.value,
             to_bytes(hexstr=web3_transaction.input),
             web3_transaction.v,
@@ -78,7 +83,7 @@ def web3_result_to_transaction(web3_transaction, block_number):
             web3_transaction.nonce,
             web3_transaction.gasPrice,
             web3_transaction.gas,
-            to_canonical_address(web3_transaction.to),
+            recipient,
             web3_transaction.value,
             to_bytes(hexstr=web3_transaction.input),
             _normalize_access_list(web3_transaction),
@@ -93,7 +98,7 @@ def web3_result_to_transaction(web3_transaction, block_number):
             web3_transaction.maxPriorityFeePerGas,
             web3_transaction.maxFeePerGas,
             web3_transaction.gas,
-            to_canonical_address(web3_transaction.to),
+            recipient,
             web3_transaction.value,
             to_bytes(hexstr=web3_transaction.input),
             _normalize_access_list(web3_transaction),
