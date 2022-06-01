@@ -83,8 +83,15 @@ def handle_new_header(
     :param chain_id: Ethereum network Chain ID that this header exists on
     """
     block_fields = propagate_header(w3, portal_inserter, chain_id, header_hash)
-    # TODO propagate bodies & receipts
-    propagate_receipts(w3, portal_inserter, chain_id, block_fields)
+
+    # Convert web3 transactions to py-evm transactions
+    transactions = [
+        web3_result_to_transaction(web3_transaction, block_fields.number)
+        for web3_transaction in block_fields.transactions
+    ]
+
+    propagate_block_bodies(w3, portal_inserter, chain_id, block_fields, transactions)
+    propagate_receipts(w3, portal_inserter, chain_id, block_fields, transactions)
 
 
 def propagate_header(
@@ -102,7 +109,7 @@ def propagate_header(
     :return: the web3 block fields for the given header hash
     """
     # Retrieve data to post to network
-    block_fields = w3.eth.get_block(header_hash, full_transactions=False)
+    block_fields = w3.eth.get_block(header_hash, full_transactions=True)
 
     # Encode data for posting
     content_key, content_value = block_fields_to_content(block_fields, chain_id)
@@ -143,6 +150,37 @@ def block_fields_to_content(block_fields, chain_id) -> Tuple[bytes, bytes]:
     return content_key, header_rlp
 
 
+def propagate_block_bodies(
+    w3, portal_inserter: PortalInserter, chain_id: int, block_fields, transactions
+):
+    """
+    Post block bodies to the Portal History Network.
+
+    :param w3: web3 access to core Ethereum content
+    :param portal_inserter: a class responsible for pushing content keys and
+        values into the network via a group of running portal clients
+    :param chain_id: Ethereum network Chain ID that this header exists on
+    :param block_fields: the web3 block fields for the header to retrieve
+        transactions and uncles from
+    """
+    # Retrieve data to post to network
+    web3_uncles = [w3.eth.get_block(uncle) for uncle in block_fields.uncles]
+
+    # Encode data for posting
+    content_key, content_value = _encode_block_body_content(
+        transactions,
+        web3_uncles,
+        chain_id,
+        block_fields.hash,
+        block_fields.number,
+        block_fields.transactionsRoot,
+        block_fields.sha3Uncles,
+    )
+
+    # Post data to trin nodes
+    portal_inserter.push_history(content_key, content_value)
+
+
 def encode_block_body_content(
     web3_transactions,
     web3_uncles,
@@ -168,6 +206,29 @@ def encode_block_body_content(
         for web3_transaction in web3_transactions
     ]
 
+    return _encode_block_body_content(
+        transactions,
+        web3_uncles,
+        chain_id,
+        header_hash,
+        block_number,
+        transactions_root,
+        uncles_root,
+    )
+
+
+def _encode_block_body_content(
+    transactions,
+    web3_uncles,
+    chain_id: int,
+    header_hash: bytes,
+    block_number: int,
+    transactions_root: hash,
+    uncles_root: hash,
+) -> Tuple[bytes, bytes]:
+    # Just like encode_block_body_content, but the transactions are already
+    # decoded from web3
+
     # Validate against the transactions root
     calculated_transaction_root, _ = make_trie_root_and_nodes(transactions)
     if calculated_transaction_root != transactions_root:
@@ -191,7 +252,7 @@ def encode_block_body_content(
 
 
 def propagate_receipts(
-    w3, portal_inserter: PortalInserter, chain_id: int, block_fields
+    w3, portal_inserter: PortalInserter, chain_id: int, block_fields, transactions
 ):
     """
     React to new header hash notification by posting receipts to Portal History Network.
@@ -203,10 +264,12 @@ def propagate_receipts(
     :param block_fields: the web3 block fields for the header to retrieve receipts from
     """
     # Retrieve data to post to network
+    txn_hashes = [keccak(txn.encode()) for txn in transactions]
+
     print("Collecting receipts to propagate...")
     web3_receipts = [
         w3.eth.wait_for_transaction_receipt(txn_hash, poll_latency=2)
-        for txn_hash in block_fields.transactions
+        for txn_hash in txn_hashes
     ]
     print("Collected receipts")
 
