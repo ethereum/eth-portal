@@ -1,9 +1,8 @@
-from contextlib import ExitStack, contextmanager
-from typing import Iterable, Tuple
+from typing import Tuple
 
 from eth.db.trie import make_trie_root_and_nodes
 from eth_hash.auto import keccak
-from eth_utils import ValidationError, encode_hex
+from eth_utils import ValidationError
 import rlp
 
 from eth_portal.portal_encode import (
@@ -13,85 +12,13 @@ from eth_portal.portal_encode import (
     receipt_content_key,
     receipt_content_value,
 )
-from eth_portal.trin import launch_trin
 from eth_portal.web3_decode import (
     block_fields_to_header,
     receipt_fields_to_receipt,
     web3_result_to_transaction,
 )
 
-
-class PortalInserter:
-    """
-    Track a group of Portal nodes, and simplify pushing content to them.
-
-    Eventually, it will intelligently choose which nodes to broadcast content
-    to. At documentation time, it naively pushes all content to all supplied nodes.
-    """
-
-    MAX_FIELD_DISPLAY_LENGTH = 2048
-
-    def __init__(self, web3_links):
-        """
-        Create an instance, with web3 links to the launched Portal nodes.
-        """
-        self._web3_links = web3_links
-
-    def push_history(self, content_key: bytes, content_value: bytes):
-        """
-        Push the given Portal History content out to the group of portal clients.
-        """
-        content_key_hex = encode_hex(content_key)
-        content_value_hex = encode_hex(content_value)
-
-        value_len = len(content_value_hex)
-        if value_len > self.MAX_FIELD_DISPLAY_LENGTH:
-            value_suffix = f"... ({value_len-self.MAX_FIELD_DISPLAY_LENGTH} more)"
-        else:
-            value_suffix = ""
-
-        print(
-            "Propagate new history content with key, value:",
-            content_key_hex,
-            ",",
-            content_value_hex[: self.MAX_FIELD_DISPLAY_LENGTH] + value_suffix,
-        )
-
-        # For now, just push to all inserting clients. When running more, be a
-        #   bit smarter about selecting inserters closer to the content key
-        for w3 in self._web3_links:
-            result = w3.provider.make_request(
-                "portal_historyStore", [content_key_hex, content_value_hex]
-            )
-            print("History store response:", result)
-
-
-def handle_new_header(
-    w3, portal_inserter: PortalInserter, header_hash: bytes, chain_id=1
-):
-    """
-    Handle header hash notifications by posting all new data to Portal History Network.
-
-    This data to be propagated will at least include header, block bodies
-    (uncles & transactions), and receipts. At documentation time, only headers
-    are propagated.
-
-    :param w3: web3 access to core Ethereum content
-    :param portal_inserter: a class responsible for pushing content keys and
-        values into the network via a group of running portal clients
-    :param header_hash: the new header hash that we were notified exists on the network
-    :param chain_id: Ethereum network Chain ID that this header exists on
-    """
-    block_fields = propagate_header(w3, portal_inserter, chain_id, header_hash)
-
-    # Convert web3 transactions to py-evm transactions
-    transactions = [
-        web3_result_to_transaction(web3_transaction, block_fields.number)
-        for web3_transaction in block_fields.transactions
-    ]
-
-    propagate_block_bodies(w3, portal_inserter, chain_id, block_fields, transactions)
-    propagate_receipts(w3, portal_inserter, chain_id, block_fields, transactions)
+from .insert import PortalInserter
 
 
 def propagate_header(
@@ -316,23 +243,3 @@ def encode_receipts_content(
     content_key = receipt_content_key(header_hash, chain_id)
     content_value = receipt_content_value(receipts)
     return content_key, content_value
-
-
-@contextmanager
-def launch_trin_inserters(keys: Iterable[bytes]):
-    """
-    For each key supplied, launch an instance of trin, then yield an object for propagation.
-
-    When this context manager exits, all the trin instances will also exit.
-
-    Yields a :class:`PortalInserter` instance, to push data to the whole group
-    of launched trin nodes.
-
-    :param keys: list of private keys to launch each trin instance.
-    """
-    with ExitStack() as stack:
-        web3_links = [
-            stack.enter_context(launch_trin(key, 9000 + idx))
-            for idx, key in enumerate(keys)
-        ]
-        yield PortalInserter(web3_links)
