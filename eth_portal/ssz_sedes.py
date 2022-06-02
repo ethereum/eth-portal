@@ -41,15 +41,19 @@ _MAX_HEADER_LENGTH = 2**13  # = 8192
 # of the format is unclear to me, I'm leaving more room for expansion, and
 # setting the max at about 8 kilobytes.
 
+_MAX_ENCODED_UNCLES_LENGTH = _MAX_HEADER_LENGTH * 2**4  # = 2**17 ~= 131k
+# Maximum number of uncles is currently 2. Using 16 leaves some room for the
+# protocol to increase the number of uncles.
+
 _TRANSACTIONS_SEDES = List(
     # Each encoded transaction
     List(Byte(), _MAX_TRANSACTION_LENGTH),
     _MAX_TRANSACTION_COUNT,
 )
 _UNCLES_SEDES = List(
-    # Each encoded header
-    List(Byte(), _MAX_HEADER_LENGTH),
-    16,  # Maximum number of uncles is currently 2. 2**4 leaves some room for expansion
+    # The combined rlp-encoded list of headers
+    Byte(),
+    _MAX_ENCODED_UNCLES_LENGTH,
 )
 BLOCK_BODY_SEDES = Container((_TRANSACTIONS_SEDES, _UNCLES_SEDES))
 

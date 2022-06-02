@@ -1,4 +1,3 @@
-import rlp
 import ssz
 
 from .ssz_sedes import (
@@ -36,15 +35,18 @@ def block_body_content_key(header_hash, chain_id=1):
     return BODY_TYPE_BYTE + encoded
 
 
-def block_body_content_value(transactions, uncles):
+def block_body_content_value(transactions, encoded_uncles):
     """
     Compile a list of transactions and uncle headers into a block body content value.
+
+    The uncles are already combined in a list and rlp-encoded, so they are just
+    a byte-string.
     """
     # Awkward quirk that ssz must take an iterable of individual bytes, instead of `bytes`
     encoded_transactions = [
         [bytes([byte]) for byte in transaction.encode()] for transaction in transactions
     ]
-    encoded_uncles = [[bytes([byte]) for byte in rlp.encode(uncle)] for uncle in uncles]
+    encoded_uncles = [bytes([byte]) for byte in encoded_uncles]
     return ssz.encode((encoded_transactions, encoded_uncles), BLOCK_BODY_SEDES)
 
 

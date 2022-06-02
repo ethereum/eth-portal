@@ -111,7 +111,7 @@ def test_block_body_content(web3_block_and_uncles):
         "0x010300720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c"
     )  # noqa: E501
     assert HexBytes(keccak(content_value)) == HexBytes(
-        "0xc920a1156472daadcbb73176fd97b25b0a9d1103aafe95691de0d627024d8198"
+        "0x254346e23a1bc176de3853a33e57a6fad7712b2ef1674dd7de91b639df28dbb6"
     )  # noqa: E501
 
 
