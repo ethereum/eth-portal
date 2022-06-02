@@ -1,38 +1,12 @@
-import rlp
 import ssz
-from ssz.sedes import Byte, Container, List, Vector, uint8, uint16
 
-#
-# SSZ encoding
-#
-
-# Blocks:
-HEADER_TYPE_BYTE = b"\x00"
-BODY_TYPE_BYTE = b"\x01"
-RECEIPT_TYPE_BYTE = b"\x02"
-BLOCK_KEY_SEDES = Container(
-    (
-        uint16,  # Chain ID
-        Vector(uint8, 32),  # header hash
-    )
-)
-
-TRANSACTIONS_SEDES = List(
-    # Each encoded transaction
-    List(Byte(), 65535),  # TODO identify true upper-bound on encoded transaction length
-    65535,  # 2**16-1 transaction would use up >1.3 billion gas at 21k gas each
-)
-UNCLES_SEDES = List(
-    # Each encoded header
-    List(Byte(), 65535),  # TODO identify true upper-bound on encoded header length
-    255,  # Maximum number allowed currently is 2. 2**8-1 leaves some room for expansion
-)
-BLOCK_BODY_SEDES = Container((TRANSACTIONS_SEDES, UNCLES_SEDES))
-
-BLOCK_RECEIPTS_SEDES = List(
-    # Each encoded receipt
-    List(Byte(), 65535),  # TODO identify true upper-bound on encoded receipt length
-    65535,  # 2**16-1 receipts would use up >1.3 billion gas at 21k gas each
+from .ssz_sedes import (
+    BLOCK_BODY_SEDES,
+    BLOCK_KEY_SEDES,
+    BLOCK_RECEIPTS_SEDES,
+    BODY_TYPE_BYTE,
+    HEADER_TYPE_BYTE,
+    RECEIPT_TYPE_BYTE,
 )
 
 
@@ -61,15 +35,18 @@ def block_body_content_key(header_hash, chain_id=1):
     return BODY_TYPE_BYTE + encoded
 
 
-def block_body_content_value(transactions, uncles):
+def block_body_content_value(transactions, encoded_uncles):
     """
     Compile a list of transactions and uncle headers into a block body content value.
+
+    The uncles are already combined in a list and rlp-encoded, so they are just
+    a byte-string.
     """
     # Awkward quirk that ssz must take an iterable of individual bytes, instead of `bytes`
     encoded_transactions = [
         [bytes([byte]) for byte in transaction.encode()] for transaction in transactions
     ]
-    encoded_uncles = [[bytes([byte]) for byte in rlp.encode(uncle)] for uncle in uncles]
+    encoded_uncles = [bytes([byte]) for byte in encoded_uncles]
     return ssz.encode((encoded_transactions, encoded_uncles), BLOCK_BODY_SEDES)
 
 

@@ -238,16 +238,17 @@ def _encode_block_body_content(
 
     # Convert web3 (uncle) headers into py-evm headers
     uncles = [block_fields_to_header(web3_header) for web3_header in web3_uncles]
+    encoded_uncles = rlp.encode(uncles)
 
     # Validate against the uncles root
-    calculated_uncle_root = keccak(rlp.encode(uncles))
+    calculated_uncle_root = keccak(encoded_uncles)
     if calculated_uncle_root != uncles_root:
         raise ValidationError(
             f"Could not correctly encode uncles for header {header_hash.hex()}"
         )
 
     content_key = block_body_content_key(header_hash, chain_id)
-    content_value = block_body_content_value(transactions, uncles)
+    content_value = block_body_content_value(transactions, encoded_uncles)
     return content_key, content_value
 
 
