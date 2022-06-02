@@ -1,21 +1,28 @@
 eth\_portal package
 ===================
 
+Subpackages
+-----------
+
+.. toctree::
+
+    eth_portal.bridge
+
 Submodules
 ----------
-
-eth\_portal.bridge module
--------------------------
-
-.. automodule:: eth_portal.bridge
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 eth\_portal.portal\_encode module
 ---------------------------------
 
 .. automodule:: eth_portal.portal_encode
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+eth\_portal.ssz\_sedes module
+-----------------------------
+
+.. automodule:: eth_portal.ssz_sedes
     :members:
     :undoc-members:
     :show-inheritance:
