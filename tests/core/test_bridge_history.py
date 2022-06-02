@@ -4,7 +4,7 @@ from hexbytes import HexBytes
 import pytest
 from web3.datastructures import AttributeDict
 
-from eth_portal.bridge import (
+from eth_portal.bridge.history import (
     block_fields_to_content,
     encode_block_body_content,
     encode_receipts_content,

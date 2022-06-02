@@ -27,8 +27,11 @@ How to Run a Bridge Node
 Install eth-portal from source
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Check out `eth-portal <https://github.com/carver/eth-portal>`_ via git, launch
-a fresh virtualenv, and install dependencies with ``pip install -e .[dev]``.
+In a fresh virtualenv, run ``pip install eth-portal`` to install.
+
+If you want to use the latest, greatest (and potentially buggiest), check out
+`eth-portal <https://github.com/carver/eth-portal>`_ via git and install
+dependencies with ``pip install -e .[dev]``.
 
 Link to a Portal Client
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,11 +79,20 @@ Run the Bridge Launcher
 From within the virtualenv that eth-portal is installed, at the root of the
 eth-portal directory, run::
 
-    ./scripts/launch_bridge.py
+    python -m eth_portal.bridge
 
 The script will print when a new header is being pushed to the Portal clients.
 
 It's currently assumed that ``/tmp`` is available, and the ports 9000, 9001,
 etc. are available (depending on how many Portal clients you launch).
 
-This will roughly use up a full free Infura account.
+This will roughly use about 650k requests a day, at current mainnet levels.
+That requires a paid Infura account to run full-time.
+
+
+See the trin logs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+One way to see the logs being emitted from trin is to run trin separately. If you launch trin as advised, the bridge will notice that trin is already running, and use that instance.
+
+When running the bridge normally, it will print out the shell command that launches trin, so you can simply use that same command to launch trin manually. Then shut down the bridge and re-launch it.

@@ -1,11 +1,14 @@
-#!/usr/bin/env python3
+from contextlib import ExitStack, contextmanager
 import os
 import sys
 import time
+from typing import Iterable
 
 from eth_utils import decode_hex
 
-from eth_portal.bridge import handle_new_header, launch_trin_inserters
+from eth_portal.bridge.handle import handle_new_header
+from eth_portal.bridge.insert import PortalInserter
+from eth_portal.trin import launch_trin
 
 INVALID_KEY_ENV_ERROR = (
     "Must supply environment variable PORTAL_BRIDGE_KEYS, as a"
@@ -34,6 +37,26 @@ def launch_bridge():
         header_log_loop(w3, portal_inserter, block_filter, 6)
 
 
+@contextmanager
+def launch_trin_inserters(keys: Iterable[bytes]):
+    """
+    For each key supplied, launch an instance of trin, then yield an object for propagation.
+
+    When this context manager exits, all the trin instances will also exit.
+
+    Yields a :class:`PortalInserter` instance, to push data to the whole group
+    of launched trin nodes.
+
+    :param keys: list of private keys to launch each trin instance.
+    """
+    with ExitStack() as stack:
+        web3_links = [
+            stack.enter_context(launch_trin(key, 9000 + idx))
+            for idx, key in enumerate(keys)
+        ]
+        yield PortalInserter(web3_links)
+
+
 def load_private_keys():
     try:
         concat_keys = os.environ["PORTAL_BRIDGE_KEYS"]
@@ -46,10 +69,3 @@ def load_private_keys():
             sys.exit(INVALID_KEY_ENV_ERROR)
         else:
             return keys
-
-
-if __name__ == "__main__":
-    try:
-        launch_bridge()
-    except KeyboardInterrupt:
-        print("Clean exit of bridge launcher")
