@@ -1,1 +1,0 @@
-Now launch the bridge with ``python -m eth_portal.bridge``.

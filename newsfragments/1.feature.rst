@@ -1,2 +1,0 @@
-Add a new script to monitor new headers, with Infura. Also, add utility to encode header fields
-into serialized RLP object.

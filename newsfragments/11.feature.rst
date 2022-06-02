@@ -1,1 +1,0 @@
-Push the block's receipts out to trin nodes, after detecting a new header.

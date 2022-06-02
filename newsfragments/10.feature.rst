@@ -1,2 +1,0 @@
-Utility to encode a group of receipts to its Portal Network content value. Currently assumes that we
-switch to using an SSZ list from the RLP list.

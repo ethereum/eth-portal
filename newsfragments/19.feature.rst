@@ -1,1 +1,0 @@
-Bridge node now propagates block bodies on the Portal History Network.

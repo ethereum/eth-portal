@@ -1,2 +1,0 @@
-On each header hash, build and print History Network content ID & value (another step closer to
-propagating headers as a bridge node).

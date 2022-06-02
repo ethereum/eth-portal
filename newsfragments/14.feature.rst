@@ -1,2 +1,0 @@
-In bridge launcher, detect if trin "injector" node is already running, then use it. One benefit is
-being able to observe the logs on trin during bridge operation.

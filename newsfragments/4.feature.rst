@@ -1,1 +1,0 @@
-Launch trin nodes with bridge, and push content to them, as new headers arrive.
