@@ -1,1 +1,0 @@
-Utility to encode the content key for block receipts

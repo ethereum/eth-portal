@@ -1,2 +1,0 @@
-Use black as the code formatter, and add to CI for enforcement. Upgrade isort to v5 for
-compatibility.
