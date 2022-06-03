@@ -24,16 +24,69 @@ most folks can ignore it.
 How to Run a Bridge Node
 --------------------------
 
-Install eth-portal from source
+First Installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Use this bash code to launch the bridge for the very first time::
+
+  # If you put this code block into a bash script, then the following line will
+  #   cause the script to exit early if any variable is missing
+  set -o nounset
+
+  # Install a fresh virtualenv, to have a clean installation environment
+  python3 -m venv eth-portal-venv
+
+  # Enter the new virtualenv environment
+  . eth-portal-venv/bin/activate
+
+  # Make sure to use the latest pip & setuptools
+  pip install -U pip setuptools
+
+  # Install eth-portal
+  pip install eth-portal
+
+  # Link to your already-built trin binary
+  ln -s $PATH_TO_TRIN_BINARY trin
+
+  # Verify that the Infura ID is provided
+  [ "$WEB3_INFURA_PROJECT_ID" ] || echo "Missing Infura project ID!"
+
+  # Verify that some trin private keys are provided
+  [ "$PORTAL_BRIDGE_KEYS" ] || echo "Missing Portal Bridge Keys!"
+
+  # Launch the bridge node
+  python -m eth_portal.bridge
+
+.. note::
+  Look for the ALL_CAPS variables that you must provide ahead of time with
+  ``export``.
+
+Run after first installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you exit your terminal and want to restart the bridge node, you can relaunch
+with::
+
+  # Navigate to the directory that eth-portal was orignally installed in
+
+  # Launch virtalenv
+  . eth-portal-venv/bin/activate
+
+  # Launch the bridge node
+  python -m eth_portal.bridge
+
+You can find more detail about these steps in the sections below.
+
+Detail on eth-portal Install
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In a fresh virtualenv, run ``pip install eth-portal`` to install.
 
-If you want to use the latest, greatest (and potentially buggiest), check out
-`eth-portal <https://github.com/carver/eth-portal>`_ via git and install
-dependencies with ``pip install -e .[dev]``.
+If you want to instead use the latest, greatest (and potentially buggiest),
+check out `eth-portal <https://github.com/carver/eth-portal>`_ via git and
+install dependencies with ``pip install -e .[dev]``.
 
-Link to a Portal Client
+Detail on Linking to trin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The bridge launches a bunch of portal clients, in order to join into the
@@ -50,7 +103,7 @@ could run this from the parent directory of both::
 
     ln -s trin/target/debug/trin eth-portal/trin
 
-Link to Infura
+Detail on Linking to Infura
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The bridge currently uses Infura to track when new headers arrive.
@@ -60,7 +113,7 @@ For now, create an Infura project and add the ID as an environment variable::
 
     export WEB3_INFURA_PROJECT_ID=1234567890abcdef
 
-Specify Portal Keys
+Detail on Portal Bridge Keys
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The bridge requires private keys to launch the Portal clients. There is some
@@ -73,26 +126,31 @@ After selecting your private keys, concatenate them using commas and add it to y
     export PORTAL_BRIDGE_KEYS=7261696e626f77737261696e626f77737261696e626f77737261696e626f7773,756e69636f726e73756e69636f726e73756e69636f726e73756e69636f726e73
 
 
-Run the Bridge Launcher
+Detail on Launching the Bridge
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-From within the virtualenv that eth-portal is installed, at the root of the
-eth-portal directory, run::
+If you have any trouble launching the bridge::
 
     python -m eth_portal.bridge
 
-The script will print when a new header is being pushed to the Portal clients.
+Then first make sure that you have activated your virtualenv, and are in the
+originally installed directory. There should be a ``trin`` binary linked there.
 
-It's currently assumed that ``/tmp`` is available, and the ports 9000, 9001,
-etc. are available (depending on how many Portal clients you launch).
+It's currently assumed that the ``/tmp`` is available, and the ports 9000, 9001,
+etc. are available. For each trin key you provide, the bridge will launch
+another instance of trin, which will use another port.
 
-This will roughly use about 650k requests a day, at current mainnet levels.
+Running the bridge will use about 650k requests a day, at current mainnet levels.
 That requires a paid Infura account to run full-time.
 
 
-See the trin logs
+How to See the trin Logs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-One way to see the logs being emitted from trin is to run trin separately. If you launch trin as advised, the bridge will notice that trin is already running, and use that instance.
+One way to see the logs being emitted from trin is to run trin manually and
+set RUST_LOG to display the desired logging level. The bridge will notice that
+trin is already running, and use that instance.
 
-When running the bridge normally, it will print out the shell command that launches trin, so you can simply use that same command to launch trin manually. Then shut down the bridge and re-launch it.
+In order to determine the correct trin command, you can inspect the shell
+output at the beginning of launching the bridge. Then shut down the bridge, use
+the printed command to launch trin, and re-launch the bridge.
