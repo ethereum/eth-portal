@@ -10,7 +10,7 @@ node.
 
 It starts by monitoring the Ethereum network and storing newfound data into a
 Portal client that has joined the network, using a Portal-specific json-rpc API,
-like ``portal_historyStore``. See the full `Portal RPC API
+like ``portal_historyOffer``. See the full `Portal RPC API
 <https://playground.open-rpc.org/?schemaUrl=https://raw.githubusercontent.com/ethereum/portal-network-specs/assembled-spec/jsonrpc/openrpc.json&uiSchema%5BappBar%5D%5Bui:splitView%5D=false&uiSchema%5BappBar%5D%5Bui:input%5D=false&uiSchema%5BappBar%5D%5Bui:examplesDropdown%5D=false>`_.
 
 When to Run a Bridge Node
