@@ -4,6 +4,7 @@ from eth.db.trie import make_trie_root_and_nodes
 from eth_hash.auto import keccak
 from eth_utils import ValidationError
 import rlp
+from web3.exceptions import TimeExhausted
 
 from eth_portal.portal_encode import (
     block_body_content_key,
@@ -195,10 +196,17 @@ def propagate_receipts(
     txn_hashes = [keccak(txn.encode()) for txn in transactions]
 
     print("Collecting receipts to propagate...")
-    web3_receipts = [
-        w3.eth.wait_for_transaction_receipt(txn_hash, poll_latency=2)
-        for txn_hash in txn_hashes
-    ]
+    try:
+        web3_receipts = [
+            w3.eth.wait_for_transaction_receipt(txn_hash, poll_latency=2)
+            for txn_hash in txn_hashes
+        ]
+    except TimeExhausted:
+        print(
+            f"Transaction never appeared in block #{block_fields.number}: {block_fields.hash}"
+        )
+        raise
+
     print("Collected receipts")
 
     # Encode data for posting
