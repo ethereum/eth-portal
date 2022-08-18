@@ -237,7 +237,7 @@ def encode_receipts_content(
     calculated_root, _ = make_trie_root_and_nodes(receipts)
     if calculated_root != receipt_root:
         raise ValidationError(
-            f"Could not correctly encode receipts for header {header_hash.hex()}"
+            f"Could not correctly encode receipts for header #{block_number} {header_hash.hex()}"
         )
 
     content_key = receipt_content_key(header_hash, chain_id)
