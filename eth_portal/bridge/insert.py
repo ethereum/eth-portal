@@ -43,4 +43,17 @@ class PortalInserter:
             result = w3.provider.make_request(
                 "portal_historyStore", [content_key_hex, content_value_hex]
             )
-            print("History store response:", result)
+            node_id = _w3_ipc_to_id(w3)
+            print("Sending history item to", node_id, "response:", result)
+
+
+def _w3_ipc_to_id(w3):
+    """
+    Given a web3 instance, return the node ID (prefix).
+
+    Will look up the IPC path of the web3 instance. For example:
+    '/tmp/trin-jsonrpc-0001062699225860d6e1.ipc'
+
+    and return just the ID: '0001062699225860d6e1'
+    """
+    return w3.manager.provider.ipc_path.split("-")[-1].split(".")[0]

@@ -1,4 +1,5 @@
 from contextlib import ExitStack, contextmanager
+import logging
 import os
 import sys
 import time
@@ -16,9 +17,20 @@ INVALID_KEY_ENV_ERROR = (
 )
 
 
+class DroppedFilter(Exception):
+    pass
+
+
 def header_log_loop(w3, portal_inserter, event_filter, poll_interval):
     while True:
-        for header_hash in event_filter.get_new_entries():
+        try:
+            new_entries = event_filter.get_new_entries()
+        except ValueError as exc:
+            # most likely: the filter was dropped by the node
+            logging.exception("Failure to get latest events, re-attempting...")
+            raise DroppedFilter from exc
+
+        for header_hash in new_entries:
             handle_new_header(w3, portal_inserter, header_hash)
         time.sleep(poll_interval)
 
@@ -31,10 +43,15 @@ def launch_bridge():
         # Monitor for new headers on mainnet
         from web3.auto.infura import w3
 
-        block_filter = w3.eth.filter("latest")
+        while True:
+            block_filter = w3.eth.filter("latest")
 
-        # On each new header, publish the content to the trin nodes
-        header_log_loop(w3, portal_inserter, block_filter, 6)
+            try:
+                # On each new header, publish the content to the trin nodes
+                header_log_loop(w3, portal_inserter, block_filter, 6)
+            except DroppedFilter:
+                print("Recreating filter to watch for latest headers")
+                continue
 
 
 @contextmanager
