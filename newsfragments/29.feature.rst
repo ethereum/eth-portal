@@ -1,0 +1,2 @@
+Officially claim support for python versions up to 3.9 (won't support 3.10 until a stable web3
+version does...)

@@ -32,7 +32,7 @@ lint:
 
 lint-roll:
 	isort eth_portal scripts tests
-	black eth_portal scripts tests
+	black eth_portal scripts tests setup.py
 	$(MAKE) lint
 
 test:

@@ -42,11 +42,7 @@ def block_body_content_value(transactions, encoded_uncles):
     The uncles are already combined in a list and rlp-encoded, so they are just
     a byte-string.
     """
-    # Awkward quirk that ssz must take an iterable of individual bytes, instead of `bytes`
-    encoded_transactions = [
-        [bytes([byte]) for byte in transaction.encode()] for transaction in transactions
-    ]
-    encoded_uncles = [bytes([byte]) for byte in encoded_uncles]
+    encoded_transactions = [transaction.encode() for transaction in transactions]
     return ssz.encode((encoded_transactions, encoded_uncles), BLOCK_BODY_SEDES)
 
 
@@ -65,8 +61,5 @@ def receipt_content_value(receipts) -> bytes:
     """
     Compile a list of encoded receipts into their joined content value.
     """
-    # Awkward quirk that ssz must take an iterable of individual bytes, instead of `bytes`
-    quirky_byte_list = [
-        [bytes([byte]) for byte in receipt.encode()] for receipt in receipts
-    ]
-    return ssz.encode(quirky_byte_list, BLOCK_RECEIPTS_SEDES)
+    encoded_receipts = [receipt.encode() for receipt in receipts]
+    return ssz.encode(encoded_receipts, BLOCK_RECEIPTS_SEDES)

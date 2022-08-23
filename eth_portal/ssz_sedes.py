@@ -1,4 +1,4 @@
-from ssz.sedes import Byte, Container, List, Vector, uint8, uint16
+from ssz.sedes import ByteList, Container, List, Vector, uint8, uint16
 
 #
 # History Network Sedes
@@ -47,18 +47,15 @@ _MAX_ENCODED_UNCLES_LENGTH = _MAX_HEADER_LENGTH * 2**4  # = 2**17 ~= 131k
 
 _TRANSACTIONS_SEDES = List(
     # Each encoded transaction
-    List(Byte(), _MAX_TRANSACTION_LENGTH),
+    ByteList(_MAX_TRANSACTION_LENGTH),
     _MAX_TRANSACTION_COUNT,
 )
-_UNCLES_SEDES = List(
-    # The combined rlp-encoded list of headers
-    Byte(),
-    _MAX_ENCODED_UNCLES_LENGTH,
-)
+# The combined rlp-encoded list of headers:
+_UNCLES_SEDES = ByteList(_MAX_ENCODED_UNCLES_LENGTH)
 BLOCK_BODY_SEDES = Container((_TRANSACTIONS_SEDES, _UNCLES_SEDES))
 
 BLOCK_RECEIPTS_SEDES = List(
     # Each encoded receipt
-    List(Byte(), _MAX_RECEIPT_LENGTH),
+    ByteList(_MAX_RECEIPT_LENGTH),
     _MAX_TRANSACTION_COUNT,
 )
