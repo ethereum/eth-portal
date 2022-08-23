@@ -87,5 +87,4 @@ workflows:
       - py37-core
       - py38-core
       - py39-core
-      - py310-core
       - pypy3-core
