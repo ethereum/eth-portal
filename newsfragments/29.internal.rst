@@ -1,0 +1,2 @@
+- Upgrade ssz to v0.3.0 to get cleaner & faster ssz bytelist decoding
+- Apply ``black`` formatting to setup.py
