@@ -41,7 +41,7 @@ class PortalInserter:
         #   bit smarter about selecting inserters closer to the content key
         for w3 in self._web3_links:
             result = w3.provider.make_request(
-                "portal_historyStore", [content_key_hex, content_value_hex]
+                "portal_historyOffer", [content_key_hex, content_value_hex]
             )
             node_id = _w3_ipc_to_id(w3)
             print("Sending history item to", node_id, "response:", result)
