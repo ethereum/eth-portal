@@ -49,7 +49,7 @@ with open("./README.md") as readme:
 setup(
     name="eth-portal",
     # *IMPORTANT*: Don't manually change the version here. Use `make bump`, as described in readme
-    version="0.1.0-beta.0",
+    version="0.1.0",
     description="""eth-portal: A collection of utilities related to Ethereum's Portal Network""",
     long_description=long_description,
     long_description_content_type="text/markdown",
