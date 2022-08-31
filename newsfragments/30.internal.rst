@@ -1,2 +1,0 @@
-Update project template to get smaller releases, a towncrier duplicate-note fix, CircleCI image
-upgrade, breaking change newsfragments, and pydocstyle failure explanations.

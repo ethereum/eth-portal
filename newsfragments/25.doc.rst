@@ -1,1 +1,0 @@
-Add a compiled first-time install script to docs

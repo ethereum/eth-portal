@@ -3,6 +3,46 @@ Release Notes
 
 .. towncrier release notes start
 
+Portal Network Tools v0.1.0 (2022-08-31)
+----------------------------------------
+
+Features
+~~~~~~~~
+
+- Officially claim support for python versions up to 3.9 (won't support 3.10 until a stable web3
+  version does...) (`#29 <https://github.com/ethereum/eth-portal/issues/29>`__)
+
+
+Improved Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+- Add a compiled first-time install script to docs (`#25 <https://github.com/ethereum/eth-portal/issues/25>`__)
+
+
+Internal Changes - for Portal Network Tools Contributors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- - Upgrade ssz to v0.3.0 to get cleaner & faster ssz bytelist decoding
+  - Apply ``black`` formatting to setup.py (`#29 <https://github.com/ethereum/eth-portal/issues/29>`__)
+- Update project template to get smaller releases, a towncrier duplicate-note fix, CircleCI image
+  upgrade, breaking change newsfragments, and pydocstyle failure explanations. (`#30 <https://github.com/ethereum/eth-portal/issues/30>`__)
+
+
+Miscellaneous changes
+~~~~~~~~~~~~~~~~~~~~~
+
+- `#28 <https://github.com/ethereum/eth-portal/issues/28>`__
+
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+- Use the portal_historyOffer rpc endpoint of trin, instead of portal_historyStore. This requires a
+  more recent version of trin. Follow the `rpc update in trin
+  <https://github.com/ethereum/trin/pull/411>`_ for more. (`#27 <https://github.com/ethereum/eth-portal/issues/27>`__)
+- Drop Python3.6 to support the latest ssz v0.3.0, which doesn't support py3.6. (`#29 <https://github.com/ethereum/eth-portal/issues/29>`__)
+
+
 Portal Network Tools v0.1.0-beta.0 (2022-06-02)
 -----------------------------------------------
 
