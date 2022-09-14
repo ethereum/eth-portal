@@ -1,6 +1,13 @@
+import sys
+
 from .run import launch_bridge
 
+content_files = sys.argv[1:]
 try:
-    launch_bridge()
+    # if any content files are supplied, inject those instead of following the chain head
+    launch_bridge(content_files)
 except KeyboardInterrupt:
-    print("Clean exit of bridge launcher")
+    if len(content_files):
+        print("Warning: process exited before pushing out all content")
+    else:
+        print("Clean exit of bridge launcher")

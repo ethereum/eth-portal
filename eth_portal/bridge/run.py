@@ -8,6 +8,7 @@ from typing import Iterable
 from eth_utils import decode_hex
 
 from eth_portal.bridge.handle import handle_new_header
+from eth_portal.bridge.inject import inject_content
 from eth_portal.bridge.insert import PortalInserter
 from eth_portal.trin import launch_trin
 
@@ -35,23 +36,32 @@ def header_log_loop(w3, portal_inserter, event_filter, poll_interval):
         time.sleep(poll_interval)
 
 
-def launch_bridge():
+def poll_chain_head(portal_inserter):
+    """
+    Monitor the head of the chain, and insert new content until Ctrl-C is pressed.
+    """
+    from web3.auto.infura import w3
+
+    while True:
+        block_filter = w3.eth.filter("latest")
+
+        try:
+            # On each new header, publish the content to the trin nodes
+            header_log_loop(w3, portal_inserter, block_filter, 6)
+        except DroppedFilter:
+            print("Recreating filter to watch for latest headers")
+            continue
+
+
+def launch_bridge(content_files):
     # Launch trin nodes, for broadcasting data
     # The context manager shuts down all trin nodes on context exit
     trin_node_keys = load_private_keys()
     with launch_trin_inserters(trin_node_keys) as portal_inserter:
-        # Monitor for new headers on mainnet
-        from web3.auto.infura import w3
-
-        while True:
-            block_filter = w3.eth.filter("latest")
-
-            try:
-                # On each new header, publish the content to the trin nodes
-                header_log_loop(w3, portal_inserter, block_filter, 6)
-            except DroppedFilter:
-                print("Recreating filter to watch for latest headers")
-                continue
+        if len(content_files):
+            inject_content(portal_inserter, content_files)
+        else:
+            poll_chain_head(portal_inserter)
 
 
 @contextmanager
