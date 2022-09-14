@@ -1,3 +1,5 @@
+import time
+
 from eth_utils import encode_hex
 
 
@@ -40,11 +42,32 @@ class PortalInserter:
         # For now, just push to all inserting clients. When running more, be a
         #   bit smarter about selecting inserters closer to the content key
         for w3 in self._web3_links:
-            result = w3.provider.make_request(
-                "portal_historyOffer", [content_key_hex, content_value_hex]
-            )
+            result = self.offer_hex_content(w3, content_key_hex, content_value_hex)
             node_id = _w3_ipc_to_id(w3)
-            print("Sending history item to", node_id, "response:", result)
+            print("Sent history item to", node_id, "response:", result)
+
+    @staticmethod
+    def offer_hex_content(w3, key, val):
+        try:
+            return w3.provider.make_request("portal_historyOffer", [key, val])
+        except FileNotFoundError:
+            # Retry if we just tried to hit the portal client too fast
+            for num_polls in range(100):
+                if w3.isConnected():
+                    break
+                else:
+                    if num_polls % 10 == 9:
+                        print(
+                            "Portal client is unavailable. Perhaps it is not done booting."
+                            " Retrying shortly..."
+                        )
+                    time.sleep(0.1)
+            else:
+                raise RuntimeError(
+                    "Portal client appears to be permanently unavailable"
+                )
+
+            return w3.provider.make_request("portal_historyOffer", [key, val])
 
 
 def _w3_ipc_to_id(w3):
