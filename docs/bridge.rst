@@ -154,3 +154,34 @@ trin is already running, and use that instance.
 In order to determine the correct trin command, you can inspect the shell
 output at the beginning of launching the bridge. Then shut down the bridge, use
 the printed command to launch trin, and re-launch the bridge.
+
+
+Inject Content Manually
+-------------------------
+
+The standard bridge node pushes all new network data in. Sometimes we want to
+push in old data. To do so, read on.
+
+If you have never run the bridge before, see `First Installation`_
+(although you can skip the Infura setup).
+
+Next, generate Portal-valid content keys and values. Load them into files,
+formatted according to these rules:
+
+- Each item of content is represented in its own file
+- Files have the ``.portalcontent`` extension
+- Files are named with the hex-encoded content key before the ``.``
+- File contents are the binary-encoded value to insert
+
+Supply the paths to these content files using the bridge node CLI, like::
+
+    python -m eth_portal.bridge mycontentfiles/*.portalcontent
+
+This is simply a regular path glob argument. So if you want to load every file
+in a folder, then this works too::
+
+    python -m eth_portal.bridge mycontentfiles/*
+
+By passing in an argument to the bridge command, you indicate that you want to
+inject the specified content, and then shut down. The bridge will not try to
+insert any content besides what you specify here.
