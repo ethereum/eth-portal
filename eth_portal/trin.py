@@ -34,7 +34,7 @@ def launch_trin(private_key: bytes, port: int):
         "--discovery-port", str(port),
         "--unsafe-private-key", private_key_hex,
         "--web3-ipc-path", ipc_path,
-        "--kb", "20000",
+        "--kb", "0",
         "--networks", "history",
         "--bootnodes", "default",
         # fmt: on
