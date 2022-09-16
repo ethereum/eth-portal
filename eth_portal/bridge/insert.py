@@ -1,4 +1,15 @@
-from eth_utils import encode_hex
+import time
+
+from eth_utils import encode_hex, to_tuple
+
+
+# TODO: add a portal formatter to upstream Web3 and then delete this method
+def _parse_number_clients_contacted(response):
+    if "result" in response:
+        return response["result"]
+    else:
+        print("json response to history offer was an error: {json_response!r}")
+        return 0
 
 
 class PortalInserter:
@@ -17,9 +28,13 @@ class PortalInserter:
         """
         self._web3_links = web3_links
 
+    @to_tuple
     def push_history(self, content_key: bytes, content_value: bytes):
         """
         Push the given Portal History content out to the group of portal clients.
+
+        :return: a list of how many peers were contacted with the content, with
+            an entry for each local client that the history was pushed to.
         """
         content_key_hex = encode_hex(content_key)
         content_value_hex = encode_hex(content_value)
@@ -40,11 +55,33 @@ class PortalInserter:
         # For now, just push to all inserting clients. When running more, be a
         #   bit smarter about selecting inserters closer to the content key
         for w3 in self._web3_links:
-            result = w3.provider.make_request(
-                "portal_historyOffer", [content_key_hex, content_value_hex]
-            )
+            result = self.offer_hex_content(w3, content_key_hex, content_value_hex)
             node_id = _w3_ipc_to_id(w3)
-            print("Sending history item to", node_id, "response:", result)
+            print("Sent history item to", node_id, "response:", result)
+            yield _parse_number_clients_contacted(result)
+
+    @staticmethod
+    def offer_hex_content(w3, key, val):
+        try:
+            return w3.provider.make_request("portal_historyOffer", [key, val])
+        except FileNotFoundError:
+            # Retry if we just tried to hit the portal client too fast
+            for num_polls in range(100):
+                if w3.isConnected():
+                    break
+                else:
+                    if num_polls % 10 == 9:
+                        print(
+                            "Portal client is unavailable. Perhaps it is not done booting."
+                            " Retrying shortly..."
+                        )
+                    time.sleep(0.1)
+            else:
+                raise RuntimeError(
+                    "Portal client appears to be permanently unavailable"
+                )
+
+            return w3.provider.make_request("portal_historyOffer", [key, val])
 
 
 def _w3_ipc_to_id(w3):
