@@ -53,15 +53,18 @@ def poll_chain_head(portal_inserter):
             continue
 
 
-def launch_bridge(content_files):
+def launch_bridge():
     # Launch trin nodes, for broadcasting data
     # The context manager shuts down all trin nodes on context exit
     trin_node_keys = load_private_keys()
     with launch_trin_inserters(trin_node_keys) as portal_inserter:
-        if len(content_files):
-            inject_content(portal_inserter, content_files)
-        else:
-            poll_chain_head(portal_inserter)
+        poll_chain_head(portal_inserter)
+
+
+def launch_injector(content_files):
+    trin_node_keys = load_private_keys()
+    with launch_trin_inserters(trin_node_keys) as portal_inserter:
+        inject_content(portal_inserter, content_files)
 
 
 @contextmanager
