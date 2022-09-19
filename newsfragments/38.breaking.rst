@@ -1,0 +1,2 @@
+In order to follow the tip of the chain, you must now specify ``--latest`` or ``-l``.
+See `Run after first installation`_
