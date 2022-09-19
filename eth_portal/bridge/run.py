@@ -7,7 +7,7 @@ from typing import Iterable
 
 from eth_utils import decode_hex
 
-from eth_portal.bridge.handle import handle_new_header
+from eth_portal.bridge.handle import handle_new_header, propagate_block
 from eth_portal.bridge.inject import inject_content
 from eth_portal.bridge.insert import PortalInserter
 from eth_portal.trin import launch_trin
@@ -53,6 +53,21 @@ def poll_chain_head(portal_inserter):
             continue
 
 
+def backfill_bridge_blocks(portal_inserter, start_block, end_block):
+    from web3.auto.infura import w3
+
+    block_numbers = range(start_block, end_block + 1)
+    print(f"Injecting {len(block_numbers)} blocks, starting from #{start_block}")
+
+    for block_num in block_numbers:
+        print(f"Getting block #{block_num} for injection to Portal network")
+        block_fields = w3.eth.get_block(block_num, full_transactions=True)
+        print(f"Injecting block hash {block_fields.hash.hex()}")
+        propagate_block(w3, portal_inserter, block_fields)
+
+    print(f"Finished injecting all blocks")
+
+
 def launch_bridge():
     # Launch trin nodes, for broadcasting data
     # The context manager shuts down all trin nodes on context exit
@@ -65,6 +80,12 @@ def launch_injector(content_files):
     trin_node_keys = load_private_keys()
     with launch_trin_inserters(trin_node_keys) as portal_inserter:
         inject_content(portal_inserter, content_files)
+
+
+def launch_backfill(start_block, end_block):
+    trin_node_keys = load_private_keys()
+    with launch_trin_inserters(trin_node_keys) as portal_inserter:
+        backfill_bridge_blocks(portal_inserter, start_block, end_block)
 
 
 @contextmanager

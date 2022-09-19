@@ -22,30 +22,47 @@ from eth_portal.web3_decode import (
 from .insert import PortalInserter
 
 
-def propagate_header(
-    w3, portal_inserter: PortalInserter, chain_id: int, header_hash: bytes
-):
+def propagate_block(w3, portal_inserter: PortalInserter, block_fields, chain_id=1):
     """
-    React to new header hash notification by posting header to Portal History Network.
+    Propagate the block and all related data into Portal History Network.
+
+    This data to be propagated will at least include header, block bodies
+    (uncles & transactions), and receipts. At documentation time, only headers
+    are propagated.
+
+    :param w3: web3 access to core Ethereum content
+    :param portal_inserter: a class responsible for pushing content keys and
+        values into the network via a group of running portal clients
+    :param header_hash: the new header hash that we were notified exists on the network
+    :param chain_id: Ethereum network Chain ID that this header exists on
+    """
+    propagate_header(w3, portal_inserter, block_fields, chain_id)
+
+    # Convert web3 transactions to py-evm transactions
+    transactions = [
+        web3_result_to_transaction(web3_transaction, block_fields.number)
+        for web3_transaction in block_fields.transactions
+    ]
+
+    propagate_block_bodies(w3, portal_inserter, chain_id, block_fields, transactions)
+    propagate_receipts(w3, portal_inserter, chain_id, block_fields, transactions)
+
+
+def propagate_header(w3, portal_inserter: PortalInserter, block_fields, chain_id: int):
+    """
+    Propagate the block header into Portal History Network.
 
     :param w3: web3 access to core Ethereum content
     :param portal_inserter: a class responsible for pushing content keys and
         values into the network via a group of running portal clients
     :param chain_id: Ethereum network Chain ID that this header exists on
-    :param header_hash: the new header hash that we were notified exists on the network
-
-    :return: the web3 block fields for the given header hash
+    :param block_fields: the web3 block fields for the header to propagate
     """
-    # Retrieve data to post to network
-    block_fields = w3.eth.get_block(header_hash, full_transactions=True)
-
     # Encode data for posting
     content_key, content_value = block_fields_to_content(block_fields, chain_id)
 
     # Post data to trin nodes
     portal_inserter.push_history(content_key, content_value)
-
-    return block_fields
 
 
 def block_fields_to_content(block_fields, chain_id) -> Tuple[bytes, bytes]:

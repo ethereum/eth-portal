@@ -156,11 +156,31 @@ output at the beginning of launching the bridge. Then shut down the bridge, use
 the printed command to launch trin, and re-launch the bridge.
 
 
+Backfill historical blocks
+---------------------------
+
+The standard bridge node pushes all new network data in. Sometimes we want to
+push in a particular block range. To do so, read on.
+
+If you have never run the bridge before, see `First Installation`_.
+
+In order to import blocks numbered 100 through 200 (ie~ including 100 and 200),
+run this command::
+
+    python -m eth_portal.bridge --block-range 100 200
+
+To import a single block, just repeat the same block number twice.
+
+This command will publish the specified blocks, and then shut down. The bridge
+will not try to insert any content besides what you specify here.
+
+
 Inject Content Manually
 -------------------------
 
-The standard bridge node pushes all new network data in. Sometimes we want to
-push in old data. To do so, read on.
+The standard bridge node determines the latest data to push in by following the
+chain. Sometimes we want to locally generate the data and publish it. To do so,
+read on.
 
 If you have never run the bridge before, see `First Installation`_
 (although you can skip the Infura setup).
