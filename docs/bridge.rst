@@ -55,7 +55,7 @@ Use this bash code to launch the bridge for the very first time::
   [ "$PORTAL_BRIDGE_KEYS" ] || echo "Missing Portal Bridge Keys!"
 
   # Launch the bridge node
-  python -m eth_portal.bridge
+  python -m eth_portal.bridge --latest
 
 .. note::
   Look for the ALL_CAPS variables that you must provide ahead of time with
@@ -73,7 +73,7 @@ with::
   . eth-portal-venv/bin/activate
 
   # Launch the bridge node
-  python -m eth_portal.bridge
+  python -m eth_portal.bridge --latest
 
 You can find more detail about these steps in the sections below.
 
@@ -131,7 +131,7 @@ Detail on Launching the Bridge
 
 If you have any trouble launching the bridge::
 
-    python -m eth_portal.bridge
+    python -m eth_portal.bridge --latest
 
 Then first make sure that you have activated your virtualenv, and are in the
 originally installed directory. There should be a ``trin`` binary linked there.
@@ -156,11 +156,31 @@ output at the beginning of launching the bridge. Then shut down the bridge, use
 the printed command to launch trin, and re-launch the bridge.
 
 
+Backfill historical blocks
+---------------------------
+
+The standard bridge node pushes all new network data in. Sometimes we want to
+push in a particular block range. To do so, read on.
+
+If you have never run the bridge before, see `First Installation`_.
+
+In order to import blocks numbered 100 through 200 (ie~ including 100 and 200),
+run this command::
+
+    python -m eth_portal.bridge --block-range 100 200
+
+To import a single block, just repeat the same block number twice.
+
+This command will publish the specified blocks, and then shut down. The bridge
+will not try to insert any content besides what you specify here.
+
+
 Inject Content Manually
 -------------------------
 
-The standard bridge node pushes all new network data in. Sometimes we want to
-push in old data. To do so, read on.
+The standard bridge node determines the latest data to push in by following the
+chain. Sometimes we want to locally generate the data and publish it. To do so,
+read on.
 
 If you have never run the bridge before, see `First Installation`_
 (although you can skip the Infura setup).
@@ -175,12 +195,12 @@ formatted according to these rules:
 
 Supply the paths to these content files using the bridge node CLI, like::
 
-    python -m eth_portal.bridge mycontentfiles/*.portalcontent
+    python -m eth_portal.bridge --content-files mycontentfiles/*.portalcontent
 
 This is simply a regular path glob argument. So if you want to load every file
 in a folder, then this works too::
 
-    python -m eth_portal.bridge mycontentfiles/*
+    python -m eth_portal.bridge --content-files mycontentfiles/*
 
 By passing in an argument to the bridge command, you indicate that you want to
 inject the specified content, and then shut down. The bridge will not try to

@@ -1,6 +1,4 @@
-from eth_portal.web3_decode import web3_result_to_transaction
-
-from .history import propagate_block_bodies, propagate_header, propagate_receipts
+from .history import propagate_block
 from .insert import PortalInserter
 
 
@@ -20,13 +18,7 @@ def handle_new_header(
     :param header_hash: the new header hash that we were notified exists on the network
     :param chain_id: Ethereum network Chain ID that this header exists on
     """
-    block_fields = propagate_header(w3, portal_inserter, chain_id, header_hash)
+    # Retrieve data to post to network
+    block_fields = w3.eth.get_block(header_hash, full_transactions=True)
 
-    # Convert web3 transactions to py-evm transactions
-    transactions = [
-        web3_result_to_transaction(web3_transaction, block_fields.number)
-        for web3_transaction in block_fields.transactions
-    ]
-
-    propagate_block_bodies(w3, portal_inserter, chain_id, block_fields, transactions)
-    propagate_receipts(w3, portal_inserter, chain_id, block_fields, transactions)
+    propagate_block(w3, portal_inserter, block_fields, chain_id)
