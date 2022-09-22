@@ -209,8 +209,8 @@ latex_elements = {
 latex_documents = [
     (
         "index",
-        "<MODULE_NAME>.tex",
-        "<PROJECT_NAME> Documentation",
+        "eth_portal.tex",
+        "Portal Network Tools Documentation",
         "The Ethereum Foundation",
         "manual",
     ),
@@ -244,8 +244,8 @@ latex_documents = [
 man_pages = [
     (
         "index",
-        "<MODULE_NAME>",
-        "<PROJECT_NAME> Documentation",
+        "eth_portal",
+        "Portal Network Tools Documentation",
         ["The Ethereum Foundation"],
         1,
     )
@@ -263,11 +263,11 @@ man_pages = [
 texinfo_documents = [
     (
         "index",
-        "<PROJECT_NAME>",
-        "<PROJECT_NAME> Documentation",
+        "Portal Network Tools",
+        "Portal Network Tools Documentation",
         "The Ethereum Foundation",
-        "<PROJECT_NAME>",
-        "<SHORT_DESCRIPTION>",
+        "Portal Network Tools",
+        "A collection of utilities related to Ethereum's Portal Network",
         "Miscellaneous",
     ),
 ]
