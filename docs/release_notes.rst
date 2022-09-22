@@ -3,6 +3,37 @@ Release Notes
 
 .. towncrier release notes start
 
+Portal Network Tools v0.2.0 (2022-09-22)
+----------------------------------------
+
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+- In order to follow the tip of the chain, you must now specify ``--latest`` or ``-l``.
+  See "Run after first installation" under "Run a Bridge Node" (`#38 <https://github.com/ethereum/eth-portal/issues/38>`__)
+
+
+Features
+~~~~~~~~
+
+- Publish data from a historical block range with ``--block-range``. See "Backfill historical blocks" under "Run a Bridge Node" (`#34 <https://github.com/ethereum/eth-portal/issues/34>`__)
+- Add the ability to inject specific content items on-demand with ``--content-files``. See "Inject content manually" under "Run a Bridge Node" (`#35 <https://github.com/ethereum/eth-portal/issues/35>`__)
+
+
+Internal Changes - for Portal Network Tools Contributors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- When receipts fail their check against the expected root hash, save them to a file in a temporary
+  directory (`#32 <https://github.com/ethereum/eth-portal/issues/32>`__)
+
+
+Miscellaneous changes
+~~~~~~~~~~~~~~~~~~~~~
+
+- Merge in latest project template `#41 <https://github.com/ethereum/eth-portal/issues/41>`__
+
+
 Portal Network Tools v0.1.0 (2022-08-31)
 ----------------------------------------
 

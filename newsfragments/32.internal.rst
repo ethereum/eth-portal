@@ -1,2 +1,0 @@
-When receipts fail their check against the expected root hash, save them to a file in a temporary
-directory
