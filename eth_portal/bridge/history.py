@@ -1,3 +1,4 @@
+from tempfile import NamedTemporaryFile
 from typing import Tuple
 
 from eth.db.trie import make_trie_root_and_nodes
@@ -261,8 +262,17 @@ def encode_receipts_content(
     # Validate against the receipt root
     calculated_root, _ = make_trie_root_and_nodes(receipts)
     if calculated_root != receipt_root:
+        # Keep a copy of the invalid receipts for later analysis
+        bad_data_prefix = f"trin.badreceipts.{receipt_root.hex()}."
+        with NamedTemporaryFile("w+t", prefix=bad_data_prefix, delete=False) as f:
+            for receipt in receipts:
+                f.write(receipt.encode().hex() + "\n")
+
+            invalid_receipts_filepath = f.name
+
         raise ValidationError(
-            f"Could not correctly encode receipts for header #{block_number} {header_hash.hex()}"
+            f"Could not correctly encode receipts for header #{block_number} {header_hash.hex()}."
+            f" See the file with invalid receipts at: {invalid_receipts_filepath}"
         )
 
     content_key = receipt_content_key(header_hash, chain_id)
