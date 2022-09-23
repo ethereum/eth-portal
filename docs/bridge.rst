@@ -101,7 +101,7 @@ the root of the eth-portal source directory.
 For example, if trin is checked out in a sibling directory to eth-portal, you
 could run this from the parent directory of both::
 
-    ln -s trin/target/debug/trin eth-portal/trin
+    ln -s "$PWD/trin/target/debug/trin" eth-portal/trin
 
 Detail on Linking to Infura
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
