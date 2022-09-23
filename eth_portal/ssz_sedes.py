@@ -29,11 +29,13 @@ _MAX_TRANSACTION_COUNT = 2**14  # ~= 16k
 # 2**14 simple transactions would use up >340 million gas at 21k gas each.
 # Current gas limit tops out at 30 million gas.
 
-_MAX_RECEIPT_LENGTH = 2**23  # ~= 8 million
+_MAX_RECEIPT_LENGTH = 2**27  # ~= 134 million
 # Maximum receipt length is logging a bunch of data out, currently at a cost of
 # 8 gas per byte. Since that is double the cost of 0 calldata bytes, the
-# maximum size is roughly half that of the transaction. That gives a maximum of
-# >8 million bytes per receipt.
+# maximum size is roughly half that of the transaction: 3.75 million bytes.
+# But there is more reason for protocol devs to constrain the transaction length,
+# and it's not clear what the practical limits for receipts are, so we should add more buffer room.
+# Imagine the cost drops by 2x and the block gas limit goes up by 8x. So we add 2**4 = 16x buffer.
 
 _MAX_HEADER_LENGTH = 2**13  # = 8192
 # Maximum header length is fairly stable at about 500 bytes. It might change at
