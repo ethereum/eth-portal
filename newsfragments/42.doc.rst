@@ -1,0 +1,3 @@
+Update ``ln -s`` example in bridge setup guide to use absolute source path. This prevents folks from
+getting a ``Too many levels of symbolic links`` error during setup, because `soft links require an
+absolute source path <https://unix.stackexchange.com/a/180532/251234>`_.
