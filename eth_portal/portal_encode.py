@@ -10,28 +10,24 @@ from .ssz_sedes import (
 )
 
 
-def header_content_key(header_hash, chain_id=1):
+def header_content_key(header_hash):
     """
     Convert a header hash into a header content key for the Portal History Network.
-
-    Include the chain ID, which defaults to mainnet.
     """
     # The header type ID is implicitly defined in the SSZ union which
     # specifies the content key on the header history network.
-    encoded = ssz.encode((chain_id, header_hash), BLOCK_KEY_SEDES)
+    encoded = ssz.encode((header_hash,), BLOCK_KEY_SEDES)
 
     # I don't think py-ssz supports Union types, so manually tacking it on
     return HEADER_TYPE_BYTE + encoded
 
 
-def block_body_content_key(header_hash, chain_id=1):
+def block_body_content_key(header_hash):
     """
     Convert a header hash into a block body content key for the Portal History Network.
-
-    Include the chain ID, which defaults to mainnet.
     """
     # See implementation notes in header_content_key()
-    encoded = ssz.encode((chain_id, header_hash), BLOCK_KEY_SEDES)
+    encoded = ssz.encode((header_hash,), BLOCK_KEY_SEDES)
     return BODY_TYPE_BYTE + encoded
 
 
@@ -46,14 +42,12 @@ def block_body_content_value(transactions, encoded_uncles):
     return ssz.encode((encoded_transactions, encoded_uncles), BLOCK_BODY_SEDES)
 
 
-def receipt_content_key(header_hash, chain_id=1):
+def receipt_content_key(header_hash):
     """
     Convert a header hash into a receipt content key for the Portal History Network.
-
-    Include the chain ID, which defaults to mainnet.
     """
     # See implementation notes in header_content_key()
-    encoded = ssz.encode((chain_id, header_hash), BLOCK_KEY_SEDES)
+    encoded = ssz.encode((header_hash,), BLOCK_KEY_SEDES)
     return RECEIPT_TYPE_BYTE + encoded
 
 

@@ -2,9 +2,7 @@ from .history import propagate_block
 from .insert import PortalInserter
 
 
-def handle_new_header(
-    w3, portal_inserter: PortalInserter, header_hash: bytes, chain_id=1
-):
+def handle_new_header(w3, portal_inserter: PortalInserter, header_hash: bytes):
     """
     Handle header hash notifications by posting all new data to Portal History Network.
 
@@ -16,9 +14,8 @@ def handle_new_header(
     :param portal_inserter: a class responsible for pushing content keys and
         values into the network via a group of running portal clients
     :param header_hash: the new header hash that we were notified exists on the network
-    :param chain_id: Ethereum network Chain ID that this header exists on
     """
     # Retrieve data to post to network
     block_fields = w3.eth.get_block(header_hash, full_transactions=True)
 
-    propagate_block(w3, portal_inserter, block_fields, chain_id)
+    propagate_block(w3, portal_inserter, block_fields)

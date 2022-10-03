@@ -23,7 +23,7 @@ from eth_portal.web3_decode import (
 from .insert import PortalInserter
 
 
-def propagate_block(w3, portal_inserter: PortalInserter, block_fields, chain_id=1):
+def propagate_block(w3, portal_inserter: PortalInserter, block_fields):
     """
     Propagate the block and all related data into Portal History Network.
 
@@ -35,9 +35,8 @@ def propagate_block(w3, portal_inserter: PortalInserter, block_fields, chain_id=
     :param portal_inserter: a class responsible for pushing content keys and
         values into the network via a group of running portal clients
     :param header_hash: the new header hash that we were notified exists on the network
-    :param chain_id: Ethereum network Chain ID that this header exists on
     """
-    propagate_header(w3, portal_inserter, block_fields, chain_id)
+    propagate_header(w3, portal_inserter, block_fields)
 
     # Convert web3 transactions to py-evm transactions
     transactions = [
@@ -45,28 +44,27 @@ def propagate_block(w3, portal_inserter: PortalInserter, block_fields, chain_id=
         for web3_transaction in block_fields.transactions
     ]
 
-    propagate_block_bodies(w3, portal_inserter, chain_id, block_fields, transactions)
-    propagate_receipts(w3, portal_inserter, chain_id, block_fields, transactions)
+    propagate_block_bodies(w3, portal_inserter, block_fields, transactions)
+    propagate_receipts(w3, portal_inserter, block_fields, transactions)
 
 
-def propagate_header(w3, portal_inserter: PortalInserter, block_fields, chain_id: int):
+def propagate_header(w3, portal_inserter: PortalInserter, block_fields):
     """
     Propagate the block header into Portal History Network.
 
     :param w3: web3 access to core Ethereum content
     :param portal_inserter: a class responsible for pushing content keys and
         values into the network via a group of running portal clients
-    :param chain_id: Ethereum network Chain ID that this header exists on
     :param block_fields: the web3 block fields for the header to propagate
     """
     # Encode data for posting
-    content_key, content_value = block_fields_to_content(block_fields, chain_id)
+    content_key, content_value = block_fields_to_content(block_fields)
 
     # Post data to trin nodes
     portal_inserter.push_history(content_key, content_value)
 
 
-def block_fields_to_content(block_fields, chain_id) -> Tuple[bytes, bytes]:
+def block_fields_to_content(block_fields) -> Tuple[bytes, bytes]:
     """
     Convert a web3 block into a Portal History Network content key and value.
 
@@ -92,12 +90,12 @@ def block_fields_to_content(block_fields, chain_id) -> Tuple[bytes, bytes]:
             f" header fields {block_fields} to {header!r}"
         )
 
-    content_key = header_content_key(block_fields.hash, chain_id)
+    content_key = header_content_key(block_fields.hash)
     return content_key, header_rlp
 
 
 def propagate_block_bodies(
-    w3, portal_inserter: PortalInserter, chain_id: int, block_fields, transactions
+    w3, portal_inserter: PortalInserter, block_fields, transactions
 ):
     """
     Post block bodies to the Portal History Network.
@@ -105,7 +103,6 @@ def propagate_block_bodies(
     :param w3: web3 access to core Ethereum content
     :param portal_inserter: a class responsible for pushing content keys and
         values into the network via a group of running portal clients
-    :param chain_id: Ethereum network Chain ID that this header exists on
     :param block_fields: the web3 block fields for the header to retrieve
         transactions and uncles from
     """
@@ -116,7 +113,6 @@ def propagate_block_bodies(
     content_key, content_value = _encode_block_body_content(
         transactions,
         web3_uncles,
-        chain_id,
         block_fields.hash,
         block_fields.number,
         block_fields.transactionsRoot,
@@ -130,7 +126,6 @@ def propagate_block_bodies(
 def encode_block_body_content(
     web3_transactions,
     web3_uncles,
-    chain_id: int,
     header_hash: bytes,
     block_number: int,
     transactions_root: hash,
@@ -155,7 +150,6 @@ def encode_block_body_content(
     return _encode_block_body_content(
         transactions,
         web3_uncles,
-        chain_id,
         header_hash,
         block_number,
         transactions_root,
@@ -166,7 +160,6 @@ def encode_block_body_content(
 def _encode_block_body_content(
     transactions,
     web3_uncles,
-    chain_id: int,
     header_hash: bytes,
     block_number: int,
     transactions_root: hash,
@@ -193,21 +186,18 @@ def _encode_block_body_content(
             f"Could not correctly encode uncles for header {header_hash.hex()}"
         )
 
-    content_key = block_body_content_key(header_hash, chain_id)
+    content_key = block_body_content_key(header_hash)
     content_value = block_body_content_value(transactions, encoded_uncles)
     return content_key, content_value
 
 
-def propagate_receipts(
-    w3, portal_inserter: PortalInserter, chain_id: int, block_fields, transactions
-):
+def propagate_receipts(w3, portal_inserter: PortalInserter, block_fields, transactions):
     """
     React to new header hash notification by posting receipts to Portal History Network.
 
     :param w3: web3 access to core Ethereum content
     :param portal_inserter: a class responsible for pushing content keys and
         values into the network via a group of running portal clients
-    :param chain_id: Ethereum network Chain ID that this header exists on
     :param block_fields: the web3 block fields for the header to retrieve receipts from
     """
     # Retrieve data to post to network
@@ -230,7 +220,6 @@ def propagate_receipts(
     # Encode data for posting
     content_key, content_value = encode_receipts_content(
         web3_receipts,
-        chain_id,
         block_fields.hash,
         block_fields.number,
         block_fields.receiptsRoot,
@@ -242,7 +231,6 @@ def propagate_receipts(
 
 def encode_receipts_content(
     web3_receipts,
-    chain_id: int,
     header_hash: bytes,
     block_number: int,
     receipt_root: hash,
@@ -275,6 +263,6 @@ def encode_receipts_content(
             f" See the file with invalid receipts at: {invalid_receipts_filepath}"
         )
 
-    content_key = receipt_content_key(header_hash, chain_id)
+    content_key = receipt_content_key(header_hash)
     content_value = receipt_content_value(receipts)
     return content_key, content_value
