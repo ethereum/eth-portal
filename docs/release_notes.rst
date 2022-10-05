@@ -3,6 +3,30 @@ Release Notes
 
 .. towncrier release notes start
 
+Portal Network Tools v0.2.1 (2022-10-04)
+----------------------------------------
+
+
+Features
+~~~~~~~~
+
+- Updated content key encoding ssz scheme & test vectors to new spec, removing the chain id. (`#44 <https://github.com/ethereum/eth-portal/issues/44>`__)
+
+
+Bugfixes
+~~~~~~~~
+
+- Correct the maximum receipt length in SSZ encoding. No specific bug is known to be fixed by this change. (`#40 <https://github.com/ethereum/eth-portal/issues/40>`__)
+
+
+Improved Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+- Update ``ln -s`` example in bridge setup guide to use absolute source path. This prevents folks from
+  getting a ``Too many levels of symbolic links`` error during setup, because `soft links require an
+  absolute source path <https://unix.stackexchange.com/a/180532/251234>`_. (`#42 <https://github.com/ethereum/eth-portal/issues/42>`__)
+
+
 Portal Network Tools v0.2.0 (2022-09-22)
 ----------------------------------------
 

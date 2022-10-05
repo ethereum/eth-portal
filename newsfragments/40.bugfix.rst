@@ -1,1 +1,0 @@
-Correct the maximum receipt length in SSZ encoding. No specific known bug is fixed by this change.

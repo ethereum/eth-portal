@@ -1,1 +1,0 @@
-Updated content key encoding ssz scheme & test vectors to new spec, removing the chain id.
