@@ -1,4 +1,4 @@
-from ssz.sedes import ByteList, Container, List, Vector, uint8, uint16
+from ssz.sedes import ByteList, Container, List, Vector, uint8
 
 #
 # History Network Sedes
@@ -8,12 +8,7 @@ from ssz.sedes import ByteList, Container, List, Vector, uint8, uint16
 HEADER_TYPE_BYTE = b"\x00"
 BODY_TYPE_BYTE = b"\x01"
 RECEIPT_TYPE_BYTE = b"\x02"
-BLOCK_KEY_SEDES = Container(
-    (
-        uint16,  # Chain ID
-        Vector(uint8, 32),  # header hash
-    )
-)
+BLOCK_KEY_SEDES = Container((Vector(uint8, 32),))  # header hash
 
 # Content Value serializations
 

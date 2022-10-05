@@ -12,7 +12,7 @@ from eth_portal.bridge.history import (
 
 EXPECTED_CONTENT_BY_HASH = {
     HexBytes("0xe137900645bb727b8cd3d2bca2e1af46a9270fb59feb08969668a322583f8af7"): (
-        b"\x00\x03\x00\xe17\x90\x06E\xbbr{\x8c\xd3\xd2\xbc\xa2\xe1\xafF\xa9'\x0f\xb5\x9f\xeb\x08\x96\x96h\xa3\"X?\x8a\xf7",  # noqa: E501
+        b"\x00\xe17\x90\x06E\xbbr{\x8c\xd3\xd2\xbc\xa2\xe1\xafF\xa9'\x0f\xb5\x9f\xeb\x08\x96\x96h\xa3\"X?\x8a\xf7",  # noqa: E501
         (
             b"\xf9\x02\x13\xa0\x81\x0fH\xed\x10\xc5}j>\xcd\xf5D\xd7\n\xbe\xcbb\xae0\xbd"
             b"\xe2\xe8m>\xa6\x10g\xb18w\xa6Q\xa0\x1d\xccM\xe8\xde\xc7]z\xab\x85\xb5"
@@ -41,7 +41,7 @@ EXPECTED_CONTENT_BY_HASH = {
         ),
     ),
     HexBytes("0x720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c"): (
-        b"\x00\x03\x00r\x07\x04\xf3\xaa\x11\xc5<\xf3D\xea\x06\x9d\xb9\\\xec\xb8\x1a\xd7E<\x8f'k*\x10b\x97\x96\x11\xf0\x9c",  # noqa: E501
+        b"\x00r\x07\x04\xf3\xaa\x11\xc5<\xf3D\xea\x06\x9d\xb9\\\xec\xb8\x1a\xd7E<\x8f'k*\x10b\x97\x96\x11\xf0\x9c",  # noqa: E501
         (
             b"\xf9\x02\"\xa0,X\xe3!,\x08Qx\xdb\xb1'~/<$\xb3\xf4Q&zu\xa24\x94\\\x15\x81\xaf"
             b"c\x9fJz\xa0X\xa6\x94!.\x04\x165:M8e\xcc\xf4uIkU\xaf:=;\x00 W\x00\x07"
@@ -74,8 +74,7 @@ EXPECTED_CONTENT_BY_HASH = {
 
 
 def test_header_to_content(web3_block):
-    sample_chain_id = 3
-    content_key, content_value = block_fields_to_content(web3_block, sample_chain_id)
+    content_key, content_value = block_fields_to_content(web3_block)
 
     # Prepare to grab expected results
     assert web3_block.hash in EXPECTED_CONTENT_BY_HASH
@@ -91,16 +90,14 @@ def test_bad_header_hash(web3_block):
     bad_header_dict = assoc(web3_block, "hash", b"X" * 32)
     bad_header = AttributeDict(bad_header_dict)
     with pytest.raises(ValidationError):
-        block_fields_to_content(bad_header, chain_id=1)
+        block_fields_to_content(bad_header)
 
 
 def test_block_body_content(web3_block_and_uncles):
-    sample_chain_id = 3
     web3_block, web3_uncles = web3_block_and_uncles
     content_key, content_value = encode_block_body_content(
         web3_block.transactions,
         web3_uncles,
-        sample_chain_id,
         web3_block.hash,
         web3_block.number,
         web3_block.transactionsRoot,
@@ -108,7 +105,7 @@ def test_block_body_content(web3_block_and_uncles):
     )
 
     assert content_key == HexBytes(
-        "0x010300720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c"
+        "0x01720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c"
     )  # noqa: E501
     assert HexBytes(keccak(content_value)) == HexBytes(
         "0x254346e23a1bc176de3853a33e57a6fad7712b2ef1674dd7de91b639df28dbb6"
@@ -116,7 +113,6 @@ def test_block_body_content(web3_block_and_uncles):
 
 
 def test_bad_uncle_in_block_body_content(web3_block_and_uncles):
-    sample_chain_id = 3
     web3_block, web3_uncles = web3_block_and_uncles
 
     wrong_reference_uncles_root = b"no" * 16
@@ -124,7 +120,6 @@ def test_bad_uncle_in_block_body_content(web3_block_and_uncles):
         encode_block_body_content(
             web3_block.transactions,
             web3_uncles,
-            sample_chain_id,
             web3_block.hash,
             web3_block.number,
             web3_block.transactionsRoot,
@@ -133,7 +128,6 @@ def test_bad_uncle_in_block_body_content(web3_block_and_uncles):
 
 
 def test_bad_transaction_in_block_body_content(web3_block_and_uncles):
-    sample_chain_id = 3
     web3_block, web3_uncles = web3_block_and_uncles
 
     wrong_reference_transactions_root = b"no" * 16
@@ -141,7 +135,6 @@ def test_bad_transaction_in_block_body_content(web3_block_and_uncles):
         encode_block_body_content(
             web3_block.transactions,
             web3_uncles,
-            sample_chain_id,
             web3_block.hash,
             web3_block.number,
             wrong_reference_transactions_root,
@@ -150,19 +143,17 @@ def test_bad_transaction_in_block_body_content(web3_block_and_uncles):
 
 
 def test_receipt_content(web3_block_and_receipts):
-    sample_chain_id = 4
     web3_block, web3_receipts = web3_block_and_receipts
 
     content_key, content_value = encode_receipts_content(
         web3_receipts,
-        sample_chain_id,
         web3_block.hash,
         web3_block.number,
         web3_block.receiptsRoot,
     )
 
     assert content_key == HexBytes(
-        "0x020400720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c"
+        "0x02720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c"
     )  # noqa: E501
     assert keccak(content_value) == HexBytes(
         "0x2d22e96ced3c0c4afd36a0d58e99dfd38f3c3a7e9b71c2127407f30730e6f599"
@@ -170,14 +161,12 @@ def test_receipt_content(web3_block_and_receipts):
 
 
 def test_bad_receipt_content(web3_block_and_receipts):
-    sample_chain_id = 4
     web3_block, web3_receipts = web3_block_and_receipts
 
     wrong_reference_receipt_root = b"no" * 16
     with pytest.raises(ValidationError):
         encode_receipts_content(
             web3_receipts,
-            sample_chain_id,
             web3_block.hash,
             web3_block.number,
             wrong_reference_receipt_root,
