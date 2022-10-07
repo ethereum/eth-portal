@@ -61,6 +61,7 @@ setup(
         "web3>=5.30.0,<6",
         "py-evm==0.5.0-alpha.3",
         "ssz>=0.3.0,<0.4.0",
+        "flask",
     ],
     python_requires=">=3.7, <4",
     extras_require=extras_require,

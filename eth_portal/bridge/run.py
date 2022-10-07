@@ -40,7 +40,18 @@ def poll_chain_head(portal_inserter):
     """
     Monitor the head of the chain, and insert new content until Ctrl-C is pressed.
     """
-    from web3.auto.infura import w3
+    from web3 import Web3
+
+    client_id = os.environ['GETH_CLIENT_ID']
+    client_secret = os.environ['GETH_CLIENT_SECRET']
+    headers = {
+        "headers": {
+            "Content-Type": "application/json",
+            "CF-Access-Client-Id": client_id,
+            "CF-Access-Client-Secret": client_secret,
+        }
+    }
+    w3 = Web3(Web3.HTTPProvider("https://geth-prysm.mainnet.ethpandaops.io/", request_kwargs=headers))
 
     while True:
         block_filter = w3.eth.filter("latest")
@@ -54,7 +65,19 @@ def poll_chain_head(portal_inserter):
 
 
 def backfill_bridge_blocks(portal_inserter, start_block, end_block):
-    from web3.auto.infura import w3
+    from web3 import Web3
+
+    client_id = os.environ['GETH_CLIENT_ID']
+    client_secret = os.environ['GETH_CLIENT_SECRET']
+    headers = {
+        "headers": {
+            "Content-Type": "application/json",
+            "CF-Access-Client-Id": client_id,
+            "CF-Access-Client-Secret": client_secret,
+        }
+    }
+    w3 = Web3(Web3.HTTPProvider("https://geth-prysm.mainnet.ethpandaops.io/", request_kwargs=headers))
+
 
     block_numbers = range(start_block, end_block + 1)
     print(f"Injecting {len(block_numbers)} blocks, starting from #{start_block}")
