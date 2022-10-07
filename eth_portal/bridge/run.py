@@ -65,7 +65,7 @@ def backfill_bridge_blocks(portal_inserter, start_block, end_block):
         print(f"Injecting block hash {block_fields.hash.hex()}")
         propagate_block(w3, portal_inserter, block_fields)
 
-    print(f"Finished injecting all blocks")
+    print("Finished injecting all blocks")
 
 
 def launch_bridge():
