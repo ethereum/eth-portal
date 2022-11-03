@@ -1,0 +1,1 @@
+Enable option to use custom authenticated provider rather than Infura.

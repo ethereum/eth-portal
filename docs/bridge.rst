@@ -125,6 +125,19 @@ After selecting your private keys, concatenate them using commas and add it to y
 
     export PORTAL_BRIDGE_KEYS=7261696e626f77737261696e626f77737261696e626f77737261696e626f7773,756e69636f726e73756e69636f726e73756e69636f726e73756e69636f726e73
 
+Detail on using a custom authenticated provider
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The bridge uses Infura as its default Web3 provider, but supports a custom, authenticated provider.
+The following three environment variables must be set to use a custom provider.
+- `AUTH_CLIENT_URL`
+- `AUTH_CLIENT_ID`
+- `AUTH_CLIENT_SECRET`
+
+To use a custom provider, pass in the following flag when launching the bridge::
+
+    python -m eth_portal.bridge --latest -p custom 
+
 
 Detail on Launching the Bridge
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

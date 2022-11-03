@@ -27,11 +27,18 @@ group.add_argument(
         " and publish them into the Portal network."
     ),
 )
+parser.add_argument(
+    "-p",
+    "--provider",
+    choices=["infura", "custom"],
+    default="infura",
+    help="What kind of provider to use. Defaults to Infura.",
+)
 args = parser.parse_args()
 
 try:
     if args.latest:
-        launch_bridge()
+        launch_bridge(args.provider)
     elif args.content_files:
         launch_injector(args.content_files)
     elif args.block_range:
@@ -41,7 +48,7 @@ try:
                 "The end block must be the same or larger than the start block"
             )
         else:
-            launch_backfill(start, end)
+            launch_backfill(start, end, args.provider)
     else:
         raise RuntimeError("Must run bridge with an option. Run with -h to see them.")
 except KeyboardInterrupt:
