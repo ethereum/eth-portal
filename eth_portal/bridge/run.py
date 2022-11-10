@@ -18,9 +18,9 @@ INVALID_KEY_ENV_ERROR = (
     " comma-separated list of hex-encoded Portal client 32-byte private keys"
 )
 
-INVALID_AUTH_PROVIDER_ENV_ERROR = (
+INVALID_CLOUDFLARE_AUTH_PROVIDER_ENV_ERROR = (
     "Must supply the following environment variables to use an authenticated"
-    "provider: \nAUTH_CLIENT_ID, AUTH_CLIENT_SECRET, AUTH_CLIENT_URL"
+    "cloudflare provider: \nAUTH_CLIENT_ID, AUTH_CLIENT_SECRET, AUTH_CLIENT_URL"
 )
 
 
@@ -127,13 +127,13 @@ def load_private_keys():
 
 
 def load_provider(provider_arg):
-    if provider_arg == "custom":
+    if provider_arg == "cloudflare-auth":
         try:
             client_id = os.environ["AUTH_CLIENT_ID"]
             client_secret = os.environ["AUTH_CLIENT_SECRET"]
             client_url = os.environ["AUTH_CLIENT_URL"]
         except KeyError:
-            sys.exit(INVALID_AUTH_PROVIDER_ENV_ERROR)
+            sys.exit(INVALID_CLOUDFLARE_AUTH_PROVIDER_ENV_ERROR)
         headers = {
             "headers": {
                 "Content-Type": "application/json",
@@ -144,8 +144,9 @@ def load_provider(provider_arg):
         w3 = Web3(Web3.HTTPProvider(client_url, request_kwargs=headers))
         if not w3.isConnected():
             raise RuntimeError(
-                "Invalid authenticated provider credentials, provider is not connected."
+                "Invalid authenticated cloudflare provider credentials, provider is not connected."
             )
+        return w3
     else:
         from web3.auto.infura import w3
 

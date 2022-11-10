@@ -30,7 +30,7 @@ group.add_argument(
 parser.add_argument(
     "-p",
     "--provider",
-    choices=["infura", "custom"],
+    choices=["infura", "cloudflare-auth"],
     default="infura",
     help="What kind of provider to use. Defaults to Infura.",
 )
