@@ -6,6 +6,7 @@ import time
 from typing import Iterable
 
 from eth_utils import decode_hex
+from web3 import Web3
 
 from eth_portal.bridge.handle import handle_new_header, propagate_block
 from eth_portal.bridge.inject import inject_content
@@ -15,6 +16,11 @@ from eth_portal.trin import launch_trin
 INVALID_KEY_ENV_ERROR = (
     "Must supply environment variable PORTAL_BRIDGE_KEYS, as a"
     " comma-separated list of hex-encoded Portal client 32-byte private keys"
+)
+
+INVALID_CLOUDFLARE_AUTH_PROVIDER_ENV_ERROR = (
+    "Must supply the following environment variables to use an authenticated"
+    "cloudflare provider: \nAUTH_CLIENT_ID, AUTH_CLIENT_SECRET, AUTH_CLIENT_URL"
 )
 
 
@@ -36,12 +42,10 @@ def header_log_loop(w3, portal_inserter, event_filter, poll_interval):
         time.sleep(poll_interval)
 
 
-def poll_chain_head(portal_inserter):
+def poll_chain_head(portal_inserter, w3):
     """
     Monitor the head of the chain, and insert new content until Ctrl-C is pressed.
     """
-    from web3.auto.infura import w3
-
     while True:
         block_filter = w3.eth.filter("latest")
 
@@ -53,9 +57,7 @@ def poll_chain_head(portal_inserter):
             continue
 
 
-def backfill_bridge_blocks(portal_inserter, start_block, end_block):
-    from web3.auto.infura import w3
-
+def backfill_bridge_blocks(portal_inserter, start_block, end_block, w3):
     block_numbers = range(start_block, end_block + 1)
     print(f"Injecting {len(block_numbers)} blocks, starting from #{start_block}")
 
@@ -68,12 +70,13 @@ def backfill_bridge_blocks(portal_inserter, start_block, end_block):
     print(f"Finished injecting all blocks")
 
 
-def launch_bridge():
+def launch_bridge(provider_arg):
     # Launch trin nodes, for broadcasting data
     # The context manager shuts down all trin nodes on context exit
     trin_node_keys = load_private_keys()
+    w3 = load_provider(provider_arg)
     with launch_trin_inserters(trin_node_keys) as portal_inserter:
-        poll_chain_head(portal_inserter)
+        poll_chain_head(portal_inserter, w3)
 
 
 def launch_injector(content_files):
@@ -82,10 +85,11 @@ def launch_injector(content_files):
         inject_content(portal_inserter, content_files)
 
 
-def launch_backfill(start_block, end_block):
+def launch_backfill(start_block, end_block, provider_arg):
     trin_node_keys = load_private_keys()
+    w3 = load_provider(provider_arg)
     with launch_trin_inserters(trin_node_keys) as portal_inserter:
-        backfill_bridge_blocks(portal_inserter, start_block, end_block)
+        backfill_bridge_blocks(portal_inserter, start_block, end_block, w3)
 
 
 @contextmanager
@@ -120,3 +124,30 @@ def load_private_keys():
             sys.exit(INVALID_KEY_ENV_ERROR)
         else:
             return keys
+
+
+def load_provider(provider_arg):
+    if provider_arg == "cloudflare-auth":
+        try:
+            client_id = os.environ["AUTH_CLIENT_ID"]
+            client_secret = os.environ["AUTH_CLIENT_SECRET"]
+            client_url = os.environ["AUTH_CLIENT_URL"]
+        except KeyError:
+            sys.exit(INVALID_CLOUDFLARE_AUTH_PROVIDER_ENV_ERROR)
+        headers = {
+            "headers": {
+                "Content-Type": "application/json",
+                "CF-Access-Client-Id": client_id,
+                "CF-Access-Client-Secret": client_secret,
+            }
+        }
+        w3 = Web3(Web3.HTTPProvider(client_url, request_kwargs=headers))
+        if not w3.isConnected():
+            raise RuntimeError(
+                "Invalid authenticated cloudflare provider credentials, provider is not connected."
+            )
+        return w3
+    else:
+        from web3.auto.infura import w3
+
+        return w3

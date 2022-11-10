@@ -125,6 +125,19 @@ After selecting your private keys, concatenate them using commas and add it to y
 
     export PORTAL_BRIDGE_KEYS=7261696e626f77737261696e626f77737261696e626f77737261696e626f7773,756e69636f726e73756e69636f726e73756e69636f726e73756e69636f726e73
 
+Detail on using a cloudflare authenticated provider
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The bridge uses Infura as its default Web3 provider, but supports a authenticated, cloudflare provider.
+The following three environment variables must be set to use an authenticated, cloudflare provider.
+- `AUTH_CLIENT_URL`
+- `AUTH_CLIENT_ID`
+- `AUTH_CLIENT_SECRET`
+
+To use an authenticated cloudflare provider, pass in the following flag when launching the bridge::
+
+    python -m eth_portal.bridge --latest -p cloudflare-auth
+
 
 Detail on Launching the Bridge
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
