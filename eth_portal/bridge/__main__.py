@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 
-from .run import launch_backfill, launch_bridge, launch_injector
+from .run import launch_backfill, launch_bridge, launch_injector, launch_patch_recent
 
 # Parse CLI arguments
 parser = ArgumentParser()
@@ -27,6 +27,15 @@ group.add_argument(
         " and publish them into the Portal network."
     ),
 )
+group.add_argument(
+    "--patch-recent",
+    nargs=1,
+    type=int,
+    help=(
+        "Load the N most recent blocks from the current head,"
+        " publish them into the Portal network, and shut down."
+    ),
+)
 parser.add_argument(
     "-p",
     "--provider",
@@ -49,6 +58,8 @@ try:
             )
         else:
             launch_backfill(start, end, args.provider)
+    elif args.patch_recent:
+        launch_patch_recent(args.patch_recent[0], args.provider)
     else:
         raise RuntimeError("Must run bridge with an option. Run with -h to see them.")
 except KeyboardInterrupt:

@@ -67,7 +67,7 @@ def backfill_bridge_blocks(portal_inserter, start_block, end_block, w3):
         print(f"Injecting block hash {block_fields.hash.hex()}")
         propagate_block(w3, portal_inserter, block_fields)
 
-    print(f"Finished injecting all blocks")
+    print("Finished injecting all blocks")
 
 
 def launch_bridge(provider_arg):
@@ -88,6 +88,18 @@ def launch_injector(content_files):
 def launch_backfill(start_block, end_block, provider_arg):
     trin_node_keys = load_private_keys()
     w3 = load_provider(provider_arg)
+    with launch_trin_inserters(trin_node_keys) as portal_inserter:
+        backfill_bridge_blocks(portal_inserter, start_block, end_block, w3)
+
+
+def launch_patch_recent(blocks_to_patch, provider_arg):
+    trin_node_keys = load_private_keys()
+    w3 = load_provider(provider_arg)
+    end_block = w3.eth.get_block("latest").get("number")
+    if blocks_to_patch > end_block:
+        start_block = 0
+    else:
+        start_block = end_block - blocks_to_patch
     with launch_trin_inserters(trin_node_keys) as portal_inserter:
         backfill_bridge_blocks(portal_inserter, start_block, end_block, w3)
 

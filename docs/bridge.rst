@@ -188,6 +188,18 @@ This command will publish the specified blocks, and then shut down. The bridge
 will not try to insert any content besides what you specify here.
 
 
+Patching in recent history
+--------------------------
+
+To import the latest `1000` number of blocks from the current head,
+run this command::
+
+    python -m eth_portal.bridge --patch-recent 1000
+
+This command will publish the specified blocks, and then shut down. The bridge
+will not try to insert any content besides what you specify here.
+
+
 Inject Content Manually
 -------------------------
 
