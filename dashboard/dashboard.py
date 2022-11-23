@@ -44,7 +44,18 @@ def trace():
 def trace_data():
     # Generate ENRs
     # Put ENRs in an ordered list
-    route = FLUFFY_BOOTNODE_ENRS + TRIN_BOOTNODE_ENRS
+    route = {
+        "found_at": "S",
+        "origin": "A",
+        "A": ["B", "C", "D"],
+        "B": ["E", "F", "G"],
+        "C": ["E", "H", "I"],
+        "D": ["J", "K", "L", "E", "F"],
+        "E": ["X", "Y", "Z"],
+        "F": ["Q", "R", "S"],
+        "Q": ["X", "Y", "Z"],
+    }
+
     return jsonify({"result": "data", "route": route})
 
 
