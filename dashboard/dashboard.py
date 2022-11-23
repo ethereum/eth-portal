@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template, jsonify
 from web3 import Web3
 from eth_utils import is_0x_prefixed, is_hexstr, remove_0x_prefix, decode_hex, to_hex, encode_hex
 import rlp
@@ -12,6 +12,7 @@ app = Flask(__name__)
 #
 # Routes
 #
+
 
 @app.route("/")
 def dashboard():
@@ -34,6 +35,19 @@ def dashboard():
     )
 
 
+@app.route("/trace")
+def trace():
+    return render_template('index.html')
+
+
+@app.route("/trace/data")
+def trace_data():
+    # Generate ENRs
+    # Put ENRs in an ordered list
+    route = FLUFFY_BOOTNODE_ENRS + TRIN_BOOTNODE_ENRS
+    return jsonify({"result": "data", "route": route})
+
+
 @app.route("/header/<block_hash>")
 def lookup_header(block_hash):
     w3 = get_w3()
@@ -43,38 +57,24 @@ def lookup_header(block_hash):
     try:
         block_hash = format_block_hash(block_hash)
     except Exception as msg:
-        return format_html(
-            [
-                f"<h1> Invalid block hash: {msg} </h1>",
-            ]
-        )
+        return {"error": "Badly formatted block hash: {msg}"}
 
     content_key = f"0x02{block_hash}"
     try:
         result = w3.provider.make_request(
-            "portal_historyRecursiveFindContent", [content_key]
+            "portal_historyTraceRecursiveFindContent", [content_key]
         )
     except:
-        return format_html(
-            [
-                f"<h1>Looking up header: {block_hash}</h1>",
-                "<p> Unable to retrieve header from network. </p>",
-            ]
-        )
+        return {"error": "Error retrieving block header."}
     if "result" in result:
         ssz_bytes = result["result"]
         header = rlp.decode(decode_hex(ssz_bytes), LondonBlockHeader)
-        return format_html(
-            [
-                f"<h1>Looking up header: {block_hash}</h1>",
-                f"<p> {header.as_dict()} </p>",
-            ]
-        )
-    else: 
-        return format_html(
-            [f"<p> error: {result}</p>",]
-        )
+        return {"result": header, "route": result["route"]}
 
+    else:
+        return format_html(
+            [f"<p> error: {result}</p>", ]
+        )
 
 
 @app.route("/block_body/<block_hash>")
@@ -107,7 +107,8 @@ def lookup_body(block_hash):
         ]
     )
 
-@app.route("/receipts/<block_hash>")
+
+@ app.route("/receipts/<block_hash>")
 def lookup_receipts(block_hash):
     w3 = get_w3()
     if not w3.isConnected():
@@ -137,6 +138,7 @@ def lookup_receipts(block_hash):
         ]
     )
 
+
 @app.route("/eth_getBlockByNumber/<block_number>")
 def eth_getBlockByNumber(block_number):
     w3 = get_w3()
@@ -163,17 +165,18 @@ def eth_getBlockByNumber(block_number):
                 f"<p> {header} </p>",
             ]
         )
-    else: 
+    else:
         return format_html(
-            [f"<p> error: {result}</p>",]
+            [f"<p> error: {result}</p>", ]
         )
 
 #
 # Utils
 #
 
+
 def get_w3():
-    return Web3(Web3.IPCProvider("/tmp/trin-jsonrpc.ipc", timeout=10))
+    return Web3(Web3.IPCProvider("/tmp/trin-jsonrpc.ipc", timeout=60))
     # return Web3(Web3.HTTPProvider("https://127.0.0.1:8545"))
 
 
@@ -213,6 +216,7 @@ def format_html(elements):
     elements.insert(0, HTML_HEADER)
     return "".join(elements)
 
+
 def error_html():
     elements = [
         "<h1> Local Trin node unavailable.</h1>",
@@ -223,6 +227,7 @@ def error_html():
 #
 # Constants
 #
+
 
 TRIN_BOOTNODE_ENRS = [
     "enr:-IS4QBISSFfBzsBrjq61iSIxPMfp5ShBTW6KQUglzH_tj8_SJaehXdlnZI-NAkTGeoclwnTB-pU544BQA44BiDZ2rkMBgmlkgnY0gmlwhKEjVaWJc2VjcDI1NmsxoQOSGugH1jSdiE_fRK1FIBe9oLxaWH8D_7xXSnaOVBe-SYN1ZHCCIyg",
@@ -271,4 +276,4 @@ GREEN_CIRCLE = "&#128994;"
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0")
+    app.run(host="0.0.0.0", debug=True)
