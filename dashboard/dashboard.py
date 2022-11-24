@@ -40,23 +40,32 @@ def trace():
     return render_template('index.html')
 
 
-@app.route("/trace/data")
-def trace_data():
+@app.route("/trace/header/<block_hash>")
+def trace_header(block_hash):
     # Generate ENRs
     # Put ENRs in an ordered list
-    route = {
-        "found_at": "S",
-        "origin": "A",
-        "A": ["B", "C", "D"],
-        "B": ["E", "F", "G"],
-        "C": ["E", "H", "I"],
-        "D": ["J", "K", "L", "E", "F"],
-        "E": ["X", "Y", "Z"],
-        "F": ["Q", "R", "S"],
-        "Q": ["X", "Y", "Z"],
-    }
+    w3 = get_w3()
+    if not w3.isConnected():
+        return error_html()
 
-    return jsonify({"result": "data", "route": route})
+    try:
+        block_hash = format_block_hash(block_hash)
+    except Exception as msg:
+        return {"error": "Badly formatted block hash: {msg}"}
+
+    content_key = f"0x02{block_hash}"
+    try:
+        result = w3.provider.make_request(
+            "portal_historyTraceRecursiveFindContent", [content_key]
+        )
+    except:
+        return {"error": "Error retrieving block header."}
+    if "result" in result:
+        result = result["result"]
+        route = result["route"]
+        return jsonify({"result": {}, "route": route})
+    else:
+        return jsonify({"error": result})
 
 
 @app.route("/header/<block_hash>")

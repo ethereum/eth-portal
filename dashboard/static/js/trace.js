@@ -7,7 +7,7 @@ $(document).ready(function () {
 // Upon success, renders graph representation of the received data.
 function sendTraceContentRequest() {
 
-    $.get(`trace/data`, function (data) {
+    $.get(`trace/header/0x56a9bb0302da44b8c0b3df540781424684c3af04d0b7a38d72842b762076a664`, function (data) {
         if ('result' in data && 'route' in data) {
 
             let graph_data = create_graph_data(data.route);
@@ -59,8 +59,9 @@ function create_graph_data(route) {
 
     let nodes = [];
     let nodes_seen = [];
-    Object.keys(route).forEach((enr, index) => {
-        let responded_with = route[enr];
+    let routes = route.nodes_responded_with;
+    Object.keys(routes).forEach((enr, index) => {
+        let responded_with = routes[enr];
         if (!Array.isArray(responded_with)) {
             return;
         }
@@ -69,29 +70,30 @@ function create_graph_data(route) {
             if ('origin' in route && route['origin'] == enr) {
                 group = 1;
             }
-            if ('found_at' in route && route['found_at'] == enr) {
-                group = 2;
-            }
             nodes.push({ id: enr, group: group });
             nodes_seen.push(enr);
         }
     });
     let links = [];
-    Object.keys(route).forEach((enr_source, index) => {
+    Object.keys(routes).forEach((enr_source, index) => {
 
-        let responded_with = route[enr_source];
+        let responded_with = routes[enr_source];
         if (!Array.isArray(responded_with)) {
             return;
         }
         responded_with.forEach((enr_target, index) => {
             if (!nodes_seen.includes(enr_target)) {
-                nodes.push({ id: enr_target, group: 0 })
+                let group = 0;
+                if ('found_content_at' in route && route['found_content_at'] == enr_target) {
+                    group = 5;
+                }
+                nodes.push({ id: enr_target, group: group })
                 nodes_seen.push(enr_target)
             }
             let value = 1;
             if (successful_route.includes(enr_source)
                 && successful_route.includes(enr_target)) {
-                value = 100;
+                value = 50;
             }
             links.push({
                 source: enr_source,
@@ -110,20 +112,21 @@ function create_graph_data(route) {
 
 function compute_successful_route(routes) {
 
-    if (!('origin' in routes && 'found_at' in routes)) {
+    if (!('origin' in routes && 'found_content_at' in routes)) {
         return [];
     }
 
     let origin = routes['origin'];
-    let found_at = routes['found_at'];
+    let found_at = routes['found_content_at'];
 
     let route = [];
     // Find the node that contains found_at
     let target_node = found_at;
     route.push(target_node);
+    let route_info = routes.nodes_responded_with;
     while (target_node != origin) {
-        Object.keys(routes).forEach((node, index) => {
-            if (Array.isArray(routes[node]) && routes[node].includes(target_node)) {
+        Object.keys(route_info).forEach((node, index) => {
+            if (Array.isArray(route_info[node]) && route_info[node].includes(target_node)) {
                 target_node = node;
                 route.push(target_node);
             }
