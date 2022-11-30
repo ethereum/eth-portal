@@ -62,8 +62,8 @@ def trace_header(block_hash):
         return {"error": "Error retrieving block header."}
     if "result" in result:
         result = result["result"]
-        route = result["route"]
-        return jsonify({"result": {}, "route": route})
+        trace = result["trace"]
+        return jsonify({"result": {}, "trace": trace})
     else:
         return jsonify({"error": result})
 
