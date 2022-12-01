@@ -1,13 +1,21 @@
 
 $(document).ready(function () {
-    sendTraceContentRequest();
+    $('#start-query-button').click(function () {
+        $('svg').remove();
+
+        sendTraceContentRequest();
+    });
 });
 
 // Sends a request for content with route info for where the content was found.
 // Upon success, renders graph representation of the received data.
 function sendTraceContentRequest() {
 
-    $.get(`trace/header/0x56a9bb0302da44b8c0b3df540781424684c3af04d0b7a38d72842b762076a664`, function (data) {
+    var content_type = $("input[name='content-type']:checked").attr('id');
+    var block_hash = $("#query-target").val();
+    console.log(block_hash);
+
+    $.get(`${content_type}/${block_hash}`, function (data) {
         if ('result' in data && 'trace' in data) {
 
             let graph_data = create_graph_data(data.trace);
@@ -34,6 +42,7 @@ function render_graph(graph_data) {
         height: 600,
         invalidation: null
     });
+
 
     $('#d3-trace').before(chart);
 
@@ -109,6 +118,7 @@ function create_graph_data(trace) {
 }
 
 // Returns a list of nodes in the route, with `origin` as the first element and `found_at` as the last.
+// Starts from the end (where the content was found) and finds the way back to the origin.
 // Uses timestamps to decide between potential routes by seeing which response was available to be acted on sooner.
 function compute_successful_route(trace) {
 

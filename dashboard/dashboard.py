@@ -16,6 +16,11 @@ app = Flask(__name__)
 
 @app.route("/")
 def dashboard():
+    return render_template('index.html')
+
+
+@app.route("/bootnodes")
+def bootnodes():
     w3 = get_w3()
     if not w3.isConnected():
         return error_html()
@@ -35,15 +40,60 @@ def dashboard():
     )
 
 
-@app.route("/trace")
-def trace():
-    return render_template('index.html')
+@app.route("/header/<block_hash>")
+def lookup_header(block_hash):
+    w3 = get_w3()
+    if not w3.isConnected():
+        return error_html()
+
+    try:
+        block_hash = format_block_hash(block_hash)
+    except Exception as msg:
+        return {"error": "Badly formatted block hash: {msg}"}
+
+    content_key = f"0x00{block_hash}"
+    try:
+        result = w3.provider.make_request(
+            "portal_historyTraceRecursiveFindContent", [content_key]
+        )
+    except:
+        return {"error": "Error retrieving block header."}
+    if "result" in result:
+        result = result["result"]
+        trace = result["trace"]
+        return jsonify({"result": result, "trace": trace})
+    else:
+        return jsonify({"error": result})
 
 
-@app.route("/trace/header/<block_hash>")
-def trace_header(block_hash):
-    # Generate ENRs
-    # Put ENRs in an ordered list
+@app.route("/body/<block_hash>")
+def lookup_body(block_hash):
+    w3 = get_w3()
+    if not w3.isConnected():
+        return error_html()
+
+    try:
+        block_hash = format_block_hash(block_hash)
+    except Exception as msg:
+        return {"error": "Badly formatted block hash: {msg}"}
+
+    content_key = f"0x01{block_hash}"
+    try:
+        result = w3.provider.make_request(
+            "portal_historyTraceRecursiveFindContent", [content_key]
+        )
+    except:
+        return {"error": "Error retrieving block header."}
+    if "result" in result:
+        result = result["result"]
+        trace = result["trace"]
+        return jsonify({"result": result, "trace": trace})
+    else:
+        return jsonify({"error": result})
+
+
+@ app.route("/receipts/<block_hash>")
+def lookup_receipts(block_hash):
     w3 = get_w3()
     if not w3.isConnected():
         return error_html()
@@ -63,100 +113,9 @@ def trace_header(block_hash):
     if "result" in result:
         result = result["result"]
         trace = result["trace"]
-        return jsonify({"result": {}, "trace": trace})
+        return jsonify({"result": result, "trace": trace})
     else:
         return jsonify({"error": result})
-
-
-@app.route("/header/<block_hash>")
-def lookup_header(block_hash):
-    w3 = get_w3()
-    if not w3.isConnected():
-        return error_html()
-
-    try:
-        block_hash = format_block_hash(block_hash)
-    except Exception as msg:
-        return {"error": "Badly formatted block hash: {msg}"}
-
-    content_key = f"0x02{block_hash}"
-    try:
-        result = w3.provider.make_request(
-            "portal_historyTraceRecursiveFindContent", [content_key]
-        )
-    except:
-        return {"error": "Error retrieving block header."}
-    if "result" in result:
-        ssz_bytes = result["result"]
-        header = rlp.decode(decode_hex(ssz_bytes), LondonBlockHeader)
-        return {"result": header, "route": result["route"]}
-
-    else:
-        return format_html(
-            [f"<p> error: {result}</p>", ]
-        )
-
-
-@app.route("/block_body/<block_hash>")
-def lookup_body(block_hash):
-    w3 = get_w3()
-    if not w3.isConnected():
-        return error_html()
-
-    try:
-        block_hash = format_block_hash(block_hash)
-    except Exception as msg:
-        return format_html([f"<h1> Invalid block hash: {msg} </h1>"])
-
-    content_key = f"0x02{block_hash}"
-    try:
-        result = w3.provider.make_request(
-            "portal_historyRecursiveFindContent", [content_key]
-        )
-    except:
-        return format_html(
-            [
-                f"<h1>Looking up block body: {block_hash}</h1>",
-                "<p> Unable to retrieve block body from network. </p>",
-            ]
-        )
-    return format_html(
-        [
-            f"<h1>Looking up block body: {block_hash}</h1>",
-            f"<p> {result} </p>",
-        ]
-    )
-
-
-@ app.route("/receipts/<block_hash>")
-def lookup_receipts(block_hash):
-    w3 = get_w3()
-    if not w3.isConnected():
-        return error_html()
-
-    try:
-        block_hash = format_block_hash(block_hash)
-    except Exception as msg:
-        return format_html([f"<h1> Invalid block hash: {msg} </h1>"])
-
-    content_key = f"0x02{block_hash}"
-    try:
-        result = w3.provider.make_request(
-            "portal_historyRecursiveFindContent", [content_key]
-        )
-    except:
-        return format_html(
-            [
-                f"<h1>Looking up receipts: {block_hash}</h1>",
-                "<p> Unable to retrieve receipts from network. </p>",
-            ]
-        )
-    return format_html(
-        [
-            f"<h1>Looking up receipts: {block_hash}</h1>",
-            "<p> {result} </p>",
-        ]
-    )
 
 
 @app.route("/eth_getBlockByNumber/<block_number>")

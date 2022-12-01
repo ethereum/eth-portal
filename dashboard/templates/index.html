@@ -7,12 +7,28 @@
     <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
     <script src="{{url_for('static', filename='js/graph.js')}}"></script>
     <script src="{{url_for('static', filename='js/trace.js')}}"></script>
-
 </head>
 
 <body>
 
-    <div id="d3-trace"></div>
+    <div id="bootnodes">
+        <div id="fluffy"></div>
+        <div id="trin"></div>
+        <div id="ultralight"></div>
+    </div>
+
+    <div id="start-query">
+        <input type="radio" name="content-type" id="header" checked="yes" /> Header <br />
+        <input type="radio" name="content-type" id="body" /> Body <br />
+        <input type="radio" name="content-type" id="receipts" /> Receipts <br />
+        <input type="text" id="query-target" placeholder="Block Hash">
+        <button type="button" id="start-query-button">Query</button>
+    </div>
+
+
+    <div id="d3-trace">
+        <div id="key"></div>
+    </div>
 
 </body>
 
