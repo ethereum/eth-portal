@@ -7,6 +7,7 @@
     <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
     <script src="{{url_for('static', filename='js/graph.js')}}"></script>
     <script src="{{url_for('static', filename='js/trace.js')}}"></script>
+    <link rel="stylesheet" href="static/css/dashboard.css">
 </head>
 
 <body>
@@ -17,17 +18,23 @@
         <div id="ultralight"></div>
     </div>
 
-    <div id="start-query">
-        <input type="radio" name="content-type" id="header" checked="yes" /> Header <br />
-        <input type="radio" name="content-type" id="body" /> Body <br />
-        <input type="radio" name="content-type" id="receipts" /> Receipts <br />
-        <input type="text" id="query-target" placeholder="Block Hash">
-        <button type="button" id="start-query-button">Query</button>
+    <div id="query-controls">
+        <div id="start-query">
+            <input type="radio" name="content-type" id="header" checked="yes" /> Header <br />
+            <input type="radio" name="content-type" id="body" /> Body <br />
+            <input type="radio" name="content-type" id="receipts" /> Receipts <br />
+            <input type="text" id="query-target" placeholder="Block Hash">
+            <button type="button" id="start-query-button">Query</button>
+        </div>
+        <div id="results" hidden="true">
+            <h1 class="results-text">Result: </h1>
+            <textarea style="resize: none;" id="result-value" class="results-text"></textarea>
+        </div>
     </div>
 
-
-    <div id="d3-trace">
-        <div id="key"></div>
+    <div id="graph">
+        <div class="spin" hidden="true"></div>
+        <div id="graph-key"></div>
     </div>
 
 </body>

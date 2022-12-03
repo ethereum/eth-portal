@@ -1,8 +1,9 @@
 
+
 $(document).ready(function () {
+
     $('#start-query-button').click(function () {
         $('svg').remove();
-
         sendTraceContentRequest();
     });
 });
@@ -11,22 +12,46 @@ $(document).ready(function () {
 // Upon success, renders graph representation of the received data.
 function sendTraceContentRequest() {
 
-    var content_type = $("input[name='content-type']:checked").attr('id');
     var block_hash = $("#query-target").val();
-    console.log(block_hash);
+    if (block_hash.length === 0) { return };
 
+    // Start loading animation.
+    $('.spin').attr("hidden", false);
+
+    var content_type = $("input[name='content-type']:checked").attr('id');
     $.get(`${content_type}/${block_hash}`, function (data) {
         if ('result' in data && 'trace' in data) {
 
+            let result = data.result.content;
+            renderResult(result)
+
+            console.log('Graph:');
+            console.log(data.trace);
             let graph_data = create_graph_data(data.trace);
             render_graph(graph_data);
 
         } else {
             console.error('Received error from trace endpoint:');
             console.log(data);
+            renderResult(data.error);
         }
+        $('.spin').attr("hidden", true);
     },
         "json");
+
+}
+
+function renderResult(result) {
+
+    console.log('Result:');
+    console.log(result);
+
+    if (result === "0x") {
+        result = "Not found.";
+    }
+
+    $('#results').attr("hidden", false);
+    $('#result-value').text(result);
 
 }
 
@@ -43,8 +68,7 @@ function render_graph(graph_data) {
         invalidation: null
     });
 
-
-    $('#d3-trace').before(chart);
+    $('#graph').append(chart);
 
 }
 
@@ -54,6 +78,15 @@ function render_graph(graph_data) {
 function create_graph_data(trace) {
 
     let successful_route = compute_successful_route(trace);
+
+    const colors = {
+        orange: 1,
+        red: 5,
+        blue: 0,
+    }
+
+    console.log('Route:');
+    console.log(successful_route);
 
     // Create nodes.
     let nodes = [];
@@ -71,8 +104,8 @@ function create_graph_data(trace) {
             if ('origin' in trace && trace['origin'] == enr) {
                 group = 1;
             }
-            if ('found_at' in trace && trace['found_at'] == enr) {
-                group = 5;
+            if ('found_content_at' in trace && trace['found_content_at'] == enr) {
+                group = 9;
             }
             nodes.push({ id: enr, group: group });
             nodes_seen.push(enr);
@@ -91,8 +124,8 @@ function create_graph_data(trace) {
         responded_with.forEach((enr_target, _) => {
             if (!nodes_seen.includes(enr_target)) {
                 let group = 0;
-                if ('found_at' in trace && trace['found_at'] == enr_target) {
-                    group = 5;
+                if ('found_content_at' in trace && trace['found_content_at'] == enr_target) {
+                    group = 9;
                 }
                 nodes.push({ id: enr_target, group: group })
                 nodes_seen.push(enr_target)
@@ -123,7 +156,7 @@ function create_graph_data(trace) {
 function compute_successful_route(trace) {
 
     if (!('origin' in trace
-        && 'found_at' in trace)) {
+        && 'found_content_at' in trace)) {
         return [];
     }
 
@@ -168,8 +201,12 @@ function compute_successful_route(trace) {
 
         if (route.includes(target_node)) {
             // Loop detected, no route found.
+
+            console.log('Found loop');
             return [];
         } else if (previous_target == target_node) {
+
+            console.log('Didnt progress');
             // Search could not progress, no route found.
             return [];
         }

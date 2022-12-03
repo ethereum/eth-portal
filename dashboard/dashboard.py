@@ -49,7 +49,7 @@ def lookup_header(block_hash):
     try:
         block_hash = format_block_hash(block_hash)
     except Exception as msg:
-        return {"error": "Badly formatted block hash: {msg}"}
+        return {"error": "Badly formatted block hash:" + str(msg)}
 
     content_key = f"0x00{block_hash}"
     try:
@@ -155,7 +155,7 @@ def eth_getBlockByNumber(block_number):
 
 
 def get_w3():
-    return Web3(Web3.IPCProvider("/tmp/trin-jsonrpc.ipc", timeout=60))
+    return Web3(Web3.IPCProvider("/tmp/trin-jsonrpc.ipc", timeout=120))
     # return Web3(Web3.HTTPProvider("https://127.0.0.1:8545"))
 
 
@@ -183,7 +183,10 @@ def get_ultralight_bootnodes_status(w3):
 
 
 def format_block_hash(block_hash):
-    if not is_hexstr(block_hash) or not is_0x_prefixed(block_hash):
+    print("Block hash: " + block_hash)
+    if not is_hexstr(block_hash):
+        raise Exception("Is not hex string.")
+    if not is_0x_prefixed(block_hash):
         raise Exception("Not 0x prefixed hex.")
     block_hash = remove_0x_prefix(block_hash)
     if len(block_hash) != 64:
