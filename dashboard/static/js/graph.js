@@ -131,5 +131,7 @@ function ForceGraph({
             .on("end", dragended);
     }
 
+    console.log(`COLORS:`);
+    console.log(color);
     return Object.assign(svg.node(), { scales: { color } });
 }

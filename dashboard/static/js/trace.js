@@ -1,5 +1,3 @@
-
-
 $(document).ready(function () {
 
     $('#start-query-button').click(function () {
@@ -27,14 +25,17 @@ function sendTraceContentRequest() {
 
             console.log('Graph:');
             console.log(data.trace);
-            let graph_data = create_graph_data(data.trace);
-            render_graph(graph_data);
+            let graph_data = createGraphData(data.trace);
+            renderGraph(graph_data);
 
         } else {
             console.error('Received error from trace endpoint:');
             console.log(data);
             renderResult(data.error);
         }
+        $('.spin').attr("hidden", true);
+    }, function (error) {
+        console.error(error);
         $('.spin').attr("hidden", true);
     },
         "json");
@@ -56,15 +57,16 @@ function renderResult(result) {
 }
 
 // Creates a D3 graph and adds it to the DOM.
-function render_graph(graph_data) {
+function renderGraph(graph_data) {
 
     let chart = ForceGraph(graph_data, {
         nodeId: d => d.id,
         nodeGroup: d => d.group,
-        nodeTitle: d => `${d.id}\n${d.group}`,
+        nodeGroups: [0, 1, 2, 3, 4, 5, 6, 7, 9],
+        nodeTitle: d => `${d.id}\n${d.timestamp === undefined ? '' : (d.timestamp + ' ms')}`,
         linkStrokeWidth: l => Math.sqrt(l.value),
-        width: 1000,
-        height: 600,
+        width: $('#graph').width(),
+        height: $('#graph').height(),
         invalidation: null
     });
 
@@ -75,40 +77,46 @@ function render_graph(graph_data) {
 // Converts json response to format expected by D3 ForceGraph:
 // { nodes: [{ id, group }], links: [{ source_id, target_id, group }] }
 // Group of nodes determines color, group of links determines thickness.
-function create_graph_data(trace) {
+function createGraphData(trace) {
 
-    let successful_route = compute_successful_route(trace);
+    // trace.found_content_at = "0x9ce72a5457eaa5264d929512ac8aeeedc6a2fe67b2591cde6eaab34f09d448e4";
+    let successfulRoute = computeSuccessfulRoute(trace);
 
     const colors = {
         orange: 1,
-        red: 5,
+        red: 2,
         blue: 0,
-    }
+        green: 4,
+        gray: 8,
+    };
 
     console.log('Route:');
-    console.log(successful_route);
+    console.log(successfulRoute);
 
     // Create nodes.
     let nodes = [];
-    let nodes_seen = [];
+    let nodesSeen = [];
     let responses = trace.responses;
     Object.keys(responses).forEach((enr, _) => {
 
         let node = responses[enr];
-        let responded_with = node.responded_with;
-        if (!Array.isArray(responded_with)) {
+        let timestamp = node.timestamp_ms;
+        let respondedWith = node.responded_with;
+        if (!Array.isArray(respondedWith)) {
             return;
         }
-        if (!nodes_seen.includes(enr)) {
+        if (!nodesSeen.includes(enr)) {
             let group = 0;
-            if ('origin' in trace && trace['origin'] == enr) {
-                group = 1;
+            if ('origin' in trace && trace.origin == enr) {
+                group = colors.orange;
             }
-            if ('found_content_at' in trace && trace['found_content_at'] == enr) {
-                group = 9;
+            else if ('found_content_at' in trace && trace.found_content_at == enr) {
+                group = colors.green;
+            } else {
+                group = colors.blue;
             }
-            nodes.push({ id: enr, group: group });
-            nodes_seen.push(enr);
+            nodes.push({ id: enr, group: group, timestamp: timestamp });
+            nodesSeen.push(enr);
         }
     });
 
@@ -122,18 +130,20 @@ function create_graph_data(trace) {
             return;
         }
         responded_with.forEach((enr_target, _) => {
-            if (!nodes_seen.includes(enr_target)) {
+            if (!nodesSeen.includes(enr_target)) {
                 let group = 0;
-                if ('found_content_at' in trace && trace['found_content_at'] == enr_target) {
-                    group = 9;
+                if ('found_content_at' in trace && trace.found_content_at == enr_target) {
+                    group = colors.green;
+                } else {
+                    group = colors.gray;
                 }
                 nodes.push({ id: enr_target, group: group })
-                nodes_seen.push(enr_target)
+                nodesSeen.push(enr_target)
             }
             let value = 1;
-            if (successful_route.includes(enr_source)
-                && successful_route.includes(enr_target)) {
-                value = 20;
+            if (successfulRoute.includes(enr_source)
+                && successfulRoute.includes(enr_target)) {
+                value = 40;
             }
             links.push({
                 source: enr_source,
@@ -150,73 +160,42 @@ function create_graph_data(trace) {
 
 }
 
-// Returns a list of nodes in the route, with `origin` as the first element and `found_at` as the last.
+// Returns a list of nodes in the route.
 // Starts from the end (where the content was found) and finds the way back to the origin.
-// Uses timestamps to decide between potential routes by seeing which response was available to be acted on sooner.
-function compute_successful_route(trace) {
+function computeSuccessfulRoute(trace) {
 
-    if (!('origin' in trace
-        && 'found_content_at' in trace)) {
+    if (!('origin' in trace && 'found_content_at' in trace)) {
         return [];
     }
 
     let origin = trace.origin;
-    let found_at = trace.found_at;
-    let responses = trace.responses;
+    let found_at = trace.found_content_at;
 
-    // Start at the end and work backwards.
-    let target_node = found_at;
     let route = [];
+    // Find the node that contains found_at.
+    let target_node = found_at;
     route.push(target_node);
-
+    let route_info = trace.responses;
     while (target_node != origin) {
 
-        // Used to make sure the search has progressed.
         let previous_target = target_node;
+        Object.keys(route_info).forEach((node_id, _) => {
 
-        // Fastest response starts at infinity and comes down as smaller timestamps are found.
-        let fastest_response_ms = Number.MAX_SAFE_INTEGER;
+            let node = route_info[node_id];
+            let responses = node.responded_with;
 
-        // Find the node that first responded with `target_node`.
-        for (node_id in responses) {
-
-            let node = responses[node_id];
-            // Validate node data.
-            if (!('timestamp_ms' in node
-                && 'responded_with' in node
-                && Array.isArray(node.responded_with)
-                && Number.isInteger(node.timestamp_ms))) {
-                continue;
-            }
-            let timestamp = node.timestamp_ms;
-            let responded_with = node.responded_with;
-
-            if (responded_with.includes(target_node) && timestamp <= fastest_response_ms) {
-                // Fastest response (so far) found.
-                fastest_response_ms = timestamp;
+            // Find the node that responded with the current target node.
+            if (Array.isArray(responses) && responses.includes(target_node)) {
                 target_node = node_id;
+                route.push(target_node);
             }
-
-        }
-
-        if (route.includes(target_node)) {
-            // Loop detected, no route found.
-
-            console.log('Found loop');
+        })
+        if (previous_target == target_node) {
+            // Did not progress, no route found.
             return [];
-        } else if (previous_target == target_node) {
-
-            console.log('Didnt progress');
-            // Search could not progress, no route found.
-            return [];
-        }
-        else {
-            route.push(target_node)
         }
     }
-
-    // We currently have the final node first, and origin node last. Reverse for readability purposes.
-    return route.reverse();
+    return route;
 
 }
 
