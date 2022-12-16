@@ -65,6 +65,7 @@
 
 #legend {
     border: 1px solid black;
+    width: 385px;
     float: left;
     border-top: none;
     border-left: none;
@@ -76,7 +77,6 @@
 }
 
 .legend-dot {
-
     width: 10px;
     height: 10px;
     border-radius: 5;

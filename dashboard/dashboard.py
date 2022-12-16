@@ -59,8 +59,9 @@ def lookup_header(block_hash):
     except:
         return {"error": "Error retrieving block header."}
     if "result" in result:
+        print(result)
         result = result["result"]
-        trace = result["trace"]
+        trace = result["route"]
         return jsonify({"result": result, "trace": trace})
     else:
         return jsonify({"error": result})
@@ -86,7 +87,7 @@ def lookup_body(block_hash):
         return {"error": "Error retrieving block header."}
     if "result" in result:
         result = result["result"]
-        trace = result["trace"]
+        trace = result["route"]
         return jsonify({"result": result, "trace": trace})
     else:
         return jsonify({"error": result})
@@ -112,7 +113,7 @@ def lookup_receipts(block_hash):
         return {"error": "Error retrieving block header."}
     if "result" in result:
         result = result["result"]
-        trace = result["trace"]
+        trace = result["route"]
         return jsonify({"result": result, "trace": trace})
     else:
         return jsonify({"error": result})

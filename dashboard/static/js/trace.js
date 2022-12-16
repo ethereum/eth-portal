@@ -1,5 +1,4 @@
 $(document).ready(function () {
-
     $('#start-query-button').click(function () {
         $('svg').remove();
         sendTraceContentRequest();
@@ -11,6 +10,7 @@ $(document).ready(function () {
 function sendTraceContentRequest() {
 
     var block_hash = $("#query-target").val();
+
     if (block_hash.length === 0) { return };
 
     // Start loading animation.
@@ -63,7 +63,7 @@ function renderGraph(graph_data) {
         nodeId: d => d.id,
         nodeGroup: d => d.group,
         nodeGroups: [0, 1, 2, 3, 4, 5, 6, 7, 9],
-        nodeTitle: d => `${d.id}\n${d.timestamp === undefined ? '' : (d.timestamp + ' ms')}`,
+        nodeTitle: d => generate_node_metadata(d),
         linkStrokeWidth: l => Math.sqrt(l.value),
         width: $('#graph').width(),
         height: $('#graph').height(),
@@ -79,16 +79,24 @@ function renderGraph(graph_data) {
 // Group of nodes determines color, group of links determines thickness.
 function createGraphData(trace) {
 
-    // trace.found_content_at = "0x9ce72a5457eaa5264d929512ac8aeeedc6a2fe67b2591cde6eaab34f09d448e4";
-    let successfulRoute = computeSuccessfulRoute(trace);
-
     const colors = {
+        blue: 0,
         orange: 1,
         red: 2,
-        blue: 0,
         green: 4,
+        brown: 9,
         gray: 8,
+
     };
+
+    if (Object.keys(trace).length === 0) {
+        return {
+            nodes: [{ id: "local", group: colors.orange, timestamp: 0 }],
+            links: [],
+        }
+    }
+
+    let successfulRoute = computeSuccessfulRoute(trace);
 
     console.log('Route:');
     console.log(successfulRoute);
@@ -112,6 +120,8 @@ function createGraphData(trace) {
             }
             else if ('found_content_at' in trace && trace.found_content_at == enr) {
                 group = colors.green;
+            } else if (respondedWith.length == 0) {
+                group = colors.brown;
             } else {
                 group = colors.blue;
             }
@@ -131,13 +141,8 @@ function createGraphData(trace) {
         }
         responded_with.forEach((enr_target, _) => {
             if (!nodesSeen.includes(enr_target)) {
-                let group = 0;
-                if ('found_content_at' in trace && trace.found_content_at == enr_target) {
-                    group = colors.green;
-                } else {
-                    group = colors.gray;
-                }
-                nodes.push({ id: enr_target, group: group })
+
+                nodes.push({ id: enr_target, group: colors.gray });
                 nodesSeen.push(enr_target)
             }
             let value = 1;
@@ -196,6 +201,23 @@ function computeSuccessfulRoute(trace) {
         }
     }
     return route;
+
+}
+
+// Generates a string to appear on hover-over of a node.
+function generate_node_metadata(node) {
+
+    let enr = ENR.ENR.decodeTxt(node.id);
+    let timestamp = node.timestamp;
+    let client = enr.client;
+    let metadata = `${node.id}\n`;
+    if (timestamp !== undefined) {
+        metadata += `${timestamp} ms\n`;
+    }
+    if (client !== undefined) {
+        metadata += `${client}`;
+    }
+    return metadata;
 
 }
 
