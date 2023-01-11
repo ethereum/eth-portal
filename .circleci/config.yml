@@ -22,7 +22,7 @@ common: &common
           - cache-{{ .Environment.CIRCLE_JOB }}-{{ checksum "setup.py" }}-{{ checksum "tox.ini" }}-v2
     - run:
         name: install dependencies
-        command: pip install --user tox
+        command: pip install --user tox==3.14.6
     - run:
         name: run tox
         command: python -m tox -r
