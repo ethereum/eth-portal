@@ -230,3 +230,18 @@ in a folder, then this works too::
 By passing in an argument to the bridge command, you indicate that you want to
 inject the specified content, and then shut down. The bridge will not try to
 insert any content besides what you specify here.
+
+
+Run dashboard (experimental)
+----------------------------
+
+A dashboard is packaged with the bridge node to make it easy to explore the
+Portal Network. This dashboard is still very experimental, and prone to bugs.
+
+To launch the dashboard::
+
+    python -m eth_portal.dashboard
+
+To visit the dashboard, visit `http://localhost:5001` in your browser.
+For the dashboard to work, it requires that you have a Trin node running,
+with an IPC socket at the default path: `/tmp/trin-jsonrpc.ipc`
