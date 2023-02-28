@@ -63,7 +63,7 @@ class PortalInserter:
     @staticmethod
     def offer_hex_content(w3, key, val):
         try:
-            return w3.provider.make_request("portal_historyOffer", [key, val])
+            return w3.provider.make_request("portal_historyGossip", [key, val])
         except FileNotFoundError:
             # Retry if we just tried to hit the portal client too fast
             for num_polls in range(100):
