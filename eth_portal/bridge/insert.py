@@ -1,6 +1,9 @@
 import time
 
-from eth_utils import encode_hex, to_tuple
+from eth_utils import (
+    encode_hex,
+    to_tuple,
+)
 
 
 # TODO: add a portal formatter to upstream Web3 and then delete this method

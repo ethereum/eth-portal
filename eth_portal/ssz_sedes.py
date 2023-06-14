@@ -1,4 +1,10 @@
-from ssz.sedes import ByteList, Container, List, Vector, uint8
+from ssz.sedes import (
+    ByteList,
+    Container,
+    List,
+    Vector,
+    uint8,
+)
 
 #
 # History Network Sedes

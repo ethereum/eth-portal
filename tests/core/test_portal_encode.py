@@ -1,4 +1,6 @@
-from eth_utils import decode_hex
+from eth_utils import (
+    decode_hex,
+)
 import pytest
 
 from eth_portal.portal_encode import (

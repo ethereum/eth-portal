@@ -21,8 +21,12 @@ demonstrate with grep for two reasons:
 
 import secrets
 
-from eth_keys.datatypes import PrivateKey
-from eth_utils import keccak
+from eth_keys.datatypes import (
+    PrivateKey,
+)
+from eth_utils import (
+    keccak,
+)
 
 
 def make_ids(num_nodes):

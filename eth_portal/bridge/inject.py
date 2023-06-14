@@ -1,8 +1,14 @@
 import binascii
-from pathlib import Path
+from pathlib import (
+    Path,
+)
 import time
 
-from eth_utils import ValidationError, to_bytes, to_tuple
+from eth_utils import (
+    ValidationError,
+    to_bytes,
+    to_tuple,
+)
 
 MINIMUM_OTHER_PEERS_OFFERED = 3
 SECONDS_TO_FIND_MORE_PEERS = 10

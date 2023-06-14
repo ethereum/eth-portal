@@ -1,11 +1,23 @@
-from tempfile import NamedTemporaryFile
-from typing import Tuple
+from tempfile import (
+    NamedTemporaryFile,
+)
+from typing import (
+    Tuple,
+)
 
-from eth.db.trie import make_trie_root_and_nodes
-from eth_hash.auto import keccak
-from eth_utils import ValidationError
+from eth.db.trie import (
+    make_trie_root_and_nodes,
+)
+from eth_hash.auto import (
+    keccak,
+)
+from eth_utils import (
+    ValidationError,
+)
 import rlp
-from web3.exceptions import TimeExhausted
+from web3.exceptions import (
+    TimeExhausted,
+)
 
 from eth_portal.portal_encode import (
     block_body_content_key,
@@ -20,7 +32,9 @@ from eth_portal.web3_decode import (
     web3_result_to_transaction,
 )
 
-from .insert import PortalInserter
+from .insert import (
+    PortalInserter,
+)
 
 
 def propagate_block(w3, portal_inserter: PortalInserter, block_fields):

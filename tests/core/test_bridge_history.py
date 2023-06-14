@@ -1,8 +1,17 @@
-from eth_utils import ValidationError, keccak
-from eth_utils.toolz import assoc
-from hexbytes import HexBytes
+from eth_utils import (
+    ValidationError,
+    keccak,
+)
+from eth_utils.toolz import (
+    assoc,
+)
+from hexbytes import (
+    HexBytes,
+)
 import pytest
-from web3.datastructures import AttributeDict
+from web3.datastructures import (
+    AttributeDict,
+)
 
 from eth_portal.bridge.history import (
     block_fields_to_content,

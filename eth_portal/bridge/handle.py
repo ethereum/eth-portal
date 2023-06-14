@@ -1,5 +1,9 @@
-from .history import propagate_block
-from .insert import PortalInserter
+from .history import (
+    propagate_block,
+)
+from .insert import (
+    PortalInserter,
+)
 
 
 def handle_new_header(w3, portal_inserter: PortalInserter, header_hash: bytes):

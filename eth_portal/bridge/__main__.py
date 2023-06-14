@@ -1,6 +1,13 @@
-from argparse import ArgumentParser
+from argparse import (
+    ArgumentParser,
+)
 
-from .run import launch_backfill, launch_bridge, launch_injector, launch_patch_recent
+from .run import (
+    launch_backfill,
+    launch_bridge,
+    launch_injector,
+    launch_patch_recent,
+)
 
 # Parse CLI arguments
 parser = ArgumentParser()

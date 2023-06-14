@@ -1,10 +1,27 @@
-from eth.chains import MainnetChain
-from eth.rlp.headers import BlockHeader
-from eth.rlp.logs import Log
-from eth.rlp.receipts import Receipt
-from eth.vm.forks.london.blocks import LondonBlockHeader
-from eth_utils import ValidationError, to_bytes, to_canonical_address, to_int
-from eth_utils.toolz import assoc
+from eth.chains import (
+    MainnetChain,
+)
+from eth.rlp.headers import (
+    BlockHeader,
+)
+from eth.rlp.logs import (
+    Log,
+)
+from eth.rlp.receipts import (
+    Receipt,
+)
+from eth.vm.forks.london.blocks import (
+    LondonBlockHeader,
+)
+from eth_utils import (
+    ValidationError,
+    to_bytes,
+    to_canonical_address,
+    to_int,
+)
+from eth_utils.toolz import (
+    assoc,
+)
 
 
 def block_fields_to_header(web3_block_fields):

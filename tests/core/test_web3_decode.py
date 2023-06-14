@@ -1,6 +1,12 @@
-from eth.db.trie import make_trie_root_and_nodes
-from eth_hash.auto import keccak
-from hexbytes import HexBytes
+from eth.db.trie import (
+    make_trie_root_and_nodes,
+)
+from eth_hash.auto import (
+    keccak,
+)
+from hexbytes import (
+    HexBytes,
+)
 import rlp
 
 from eth_portal.web3_decode import (

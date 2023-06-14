@@ -1,17 +1,35 @@
-from contextlib import ExitStack, contextmanager
+from contextlib import (
+    ExitStack,
+    contextmanager,
+)
 import logging
 import os
 import sys
 import time
-from typing import Iterable
+from typing import (
+    Iterable,
+)
 
-from eth_utils import decode_hex
-from web3 import Web3
+from eth_utils import (
+    decode_hex,
+)
+from web3 import (
+    Web3,
+)
 
-from eth_portal.bridge.handle import handle_new_header, propagate_block
-from eth_portal.bridge.inject import inject_content
-from eth_portal.bridge.insert import PortalInserter
-from eth_portal.trin import launch_trin
+from eth_portal.bridge.handle import (
+    handle_new_header,
+    propagate_block,
+)
+from eth_portal.bridge.inject import (
+    inject_content,
+)
+from eth_portal.bridge.insert import (
+    PortalInserter,
+)
+from eth_portal.trin import (
+    launch_trin,
+)
 
 INVALID_KEY_ENV_ERROR = (
     "Must supply environment variable PORTAL_BRIDGE_KEYS, as a"
@@ -160,6 +178,8 @@ def load_provider(provider_arg):
             )
         return w3
     else:
-        from web3.auto.infura import w3
+        from web3.auto.infura import (
+            w3,
+        )
 
         return w3

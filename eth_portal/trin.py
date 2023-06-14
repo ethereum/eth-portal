@@ -1,11 +1,22 @@
-from contextlib import contextmanager
-from pathlib import Path
+from contextlib import (
+    contextmanager,
+)
+from pathlib import (
+    Path,
+)
 import signal
 import subprocess
 
-from eth_keys.datatypes import PrivateKey
-from eth_utils import keccak, remove_0x_prefix
-from web3 import Web3
+from eth_keys.datatypes import (
+    PrivateKey,
+)
+from eth_utils import (
+    keccak,
+    remove_0x_prefix,
+)
+from web3 import (
+    Web3,
+)
 
 
 # TODO set data directory into a ramdisk to avoid disk contention
