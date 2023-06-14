@@ -74,8 +74,8 @@ notes: check-bump
 	git commit -m "Compile release notes"
 
 release: check-bump clean
-	# require that you be on a branch that's linked to upstream/main
-	git status -s -b | head -1 | grep "\.\.upstream/main"
+  # require that upstream is configured for ethereum/web3.py
+	git remote -v | grep "upstream\tgit@github.com:ethereum/web3.py.git (push)\|upstream\thttps://github.com/ethereum/web3.py (push)"
 	# verify that docs build correctly
 	./newsfragments/validate_files.py is-empty
 	make build-docs
