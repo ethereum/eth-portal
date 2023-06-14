@@ -7,9 +7,8 @@ from setuptools import (
 
 extras_require = {
     "test": [
-        "pytest>=6.2.5,<7",
-        "pytest-xdist>=2.4.0,<3",
-        "tox==3.14.6",
+        "pytest>=7.0.0",
+        "pytest-xdist>=2.4.0",
     ],
     "lint": [
         "black>=22.1,<23",
@@ -18,16 +17,18 @@ extras_require = {
         "mypy==0.770",
         "pydocstyle>=5.0.0,<6",
     ],
-    "doc": [
-        "Sphinx>=1.6.5,<2",
-        "sphinx_rtd_theme>=0.1.9,<1",
+    "docs": [
+        "sphinx>=6.0.0",
+        "sphinx_rtd_theme>=1.0.0",
         "towncrier>=21,<22",
         "Jinja2<3",
         "MarkupSafe<2",
     ],
     "dev": [
-        "bumpversion>=0.5.3,<1",
-        "pytest-watch>=4.1.0,<5",
+        "bumpversion>=0.5.3",
+        "pytest-watch>=4.1.0",
+        "tox>=4.0.0",
+        "build>=0.9.0",
         "wheel",
         "twine",
         "ipython",
@@ -38,7 +39,7 @@ extras_require["dev"] = (
     extras_require["dev"]
     + extras_require["test"]
     + extras_require["lint"]
-    + extras_require["doc"]
+    + extras_require["docs"]
 )
 
 
@@ -75,8 +76,6 @@ setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
-        "Operating System :: MacOS",
-        "Operating System :: POSIX",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
